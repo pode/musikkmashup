@@ -10,12 +10,22 @@ h1 {
 	text-align: center;	
 }
 
+#main {
+	margin-right: 10%;	
+	margin-left: 10%;
+}
+
+#left, #right {
+	border: 1px solid black;	
+	padding: 1em;
+}
+
 #left {
 	float: left;
-	border: 1px solid black;
+	width: 56%;
 }
 
 #right {
 	float: right;
-	border: 1px solid black;
+	width: 37%;
 }

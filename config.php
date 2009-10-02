@@ -19,16 +19,21 @@ z3950: tilkoblings-streng for Z39.50
 sru: tilkoblingsstreng for SRU
 item_url: grunn-URL for postvisning i katalogen
 */
-$config['libraries']['deich'] = array(
-	'title' => 'Deichmanske', 
-	'z3950' => 'z3950.deich.folkebibl.no:210/data'
-);
+
 $config['libraries']['pode'] = array(
 	'title'    => 'Pode', 
 	'sru'      => 'http://torfeus.deich.folkebibl.no:9999/biblios', 
 	'item_url' => 'http://dev.bibpode.no/cgi-bin/koha/opac-detail.pl?biblionumber='
 );
+$config['libraries']['deich'] = array(
+	'title' => 'Deichmanske', 
+	'z3950' => 'z3950.deich.folkebibl.no:210/data'
+);
+
 /*
+
+Flere bibliotek, for eventuell testing
+
 $config['libraries']['bibsys'] = array(
 	'title' => 'BIBSYS', 
 	'z3950' => 'z3950.bibsys.no:2100/BIBSYS', 
@@ -41,6 +46,7 @@ $config['libraries']['bergen'] = array(
 	'title' => 'Bergen offentlige', 
 	'z3950' => 'z3950.bergen.folkebibl.no:210/data', 
 );
+
 */
 
 /* 

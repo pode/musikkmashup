@@ -23,14 +23,15 @@ echo('
 <form method="get" action="">
 <p>
 <input type="text" size="50" name="q" value="' . $_GET['q'] . '" />
-<select name="bib">');
+<select name="bib">
+');
 //skriver nedtrekksliste
 foreach ($config['libraries'] as $key => $value)
 {
 	if ($selected==$key)
-		echo('<option selected="selected" value="' . $key . '">' . $value['title'] . '</option>');
+		echo('<option selected="selected" value="' . $key . '">' . $value['title'] . '</option>' . "\n");
 	else
-		echo('<option value="$key">' . $value['title'] . '</option>');
+		echo('<option value="' . $key . '">' . $value['title'] . '</option>' . "\n");
 }
 echo('
 </select>
@@ -39,15 +40,47 @@ echo('
 </form>
 </div>');
 
-/* TREFFLISTE */
+// q eller item må være satt
+// bib må være satt, og må være en nøkkel i $config['libraries']
+if ((!empty($_GET['q']) || !empty($_GET['item'])) && !empty($_GET['bib']) && !empty($config['libraries'][$_GET['bib']])) {
 
-echo('<div id="left">')
-echo('</div>');
+	echo('<div id="main">');
+	
+	/* TREFFLISTE */
+	
+	echo('<div id="left">');
 
-/* BOKSER MED EKSTRAINFO */
+	// Søk
+	if (!empty($_GET['q'])) {
+		if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
+			echo(sru_search($_GET['q'], $_GET['bib']));
+		} else {
+			echo("Z39.50 søk");	
+		}
+	}
 
-echo('<div id="right">')
-echo('</div>');
+	// Postvisning	
+	if (!empty($_GET['item'])) {
+		if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
+			echo("SRU postvisning!");
+		} else {
+			echo("Z39.50 postvisning");	
+		}
+	}
+
+
+	echo('</div>');
+	
+	/* BOKSER MED EKSTRAINFO */
+	
+	echo('<div id="right">');
+	echo("test");
+	echo('</div>');
+	
+	// Avslutter div main
+	echo('</div>');
+
+}
 
 echo("</body>\n</html>");
 
