@@ -4,6 +4,7 @@
 
 include('config.php');
 include('include/functions.php');
+require('File/MARCXML.php');
 
 echo('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'); 
 echo('<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="nb_NO" lang="nb_NO">');
@@ -11,6 +12,14 @@ echo("<head>\n<title>" . $config['navn'] . "</title>\n");
 
 echo('
 <link rel="stylesheet" type="text/css" href="css/musikkmashup.css" />
+<script src="http://www.google.com/jsapi"></script>
+<script>
+  // Hent inn jQuery fra Googles JavaScript API
+  google.load("jquery", "1.3.2");
+  google.load("jqueryui", "1.7.2");
+</script>
+<script src="scripts/jquery.easywidgets.min.js" type="text/javascript"></script>
+<script src="scripts/musikk.js" type="text/javascript"></script>
 ');
 
 echo("<body>");
@@ -42,7 +51,7 @@ echo('
 
 // q eller item må være satt
 // bib må være satt, og må være en nøkkel i $config['libraries']
-if ((!empty($_GET['q']) || !empty($_GET['item'])) && !empty($_GET['bib']) && !empty($config['libraries'][$_GET['bib']])) {
+if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empty($config['libraries'][$_GET['bib']])) {
 
 	echo('<div id="main">');
 	
@@ -60,9 +69,9 @@ if ((!empty($_GET['q']) || !empty($_GET['item'])) && !empty($_GET['bib']) && !em
 	}
 
 	// Postvisning	
-	if (!empty($_GET['item'])) {
+	if (!empty($_GET['id'])) {
 		if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
-			echo("SRU postvisning!");
+			echo(sru_postvisning($_GET['id'], $_GET['bib']));
 		} else {
 			echo("Z39.50 postvisning");	
 		}
@@ -74,7 +83,18 @@ if ((!empty($_GET['q']) || !empty($_GET['item'])) && !empty($_GET['bib']) && !em
 	/* BOKSER MED EKSTRAINFO */
 	
 	echo('<div id="right">');
-	echo("test");
+
+	echo('<div id="artistvelger"><form><select name="q" id="artistvalg" onChange="setArtist(artistvalg.value)"><option>Velg artist...</option></select></form></div>');
+
+	foreach ($config['moduler'] as $key => $mod) {
+		if ($mod['aktiv']) {
+			echo('<div class="widget movable collapsable right-col-box" id="widget_' . $key . '">');
+			echo('	<div class="widget-header">' . $mod['tittel'] . '</div>');
+			echo('  <div class="widget-content"><img src="images/widgets/loading.gif" alt="Henter data..." /></div>');
+			echo('</div>');
+		}				
+	}
+
 	echo('</div>');
 	
 	// Avslutter div main

@@ -5,6 +5,10 @@
 // Navnet som vises i title-taggen og øverst på alle sider
 $config['navn'] = 'Podes musikkmashup';
 
+// Skal vi skrive ut litt ekstra debug-info? 
+// Verdier: true eller false
+$config['debug'] = true;
+
 /*
 BIBLIOTEK
 
@@ -65,6 +69,37 @@ http://www.last.fm/api/account
 $config['lastfm'] = array(
 	'api_key' => 'b1e5430e679a81219cd8ea2d0e624aaa', 
 	'api_root' => 'http://ws.audioscrobbler.com/2.0/'
+);
+
+/*
+MODULER
+
+Moduler konfigureres med et array på formen
+$config['moduler']['MODUL'] = array();
+der MODUL tilsvarer den midterste delen av filnavnet modulen 
+er implementert i: mod.MODUL.php. 
+
+Rekkefølgen på modulene nedenfor bestemmer rekkfølgen modulene
+vises i på siden. (Men dette kan overstyres av brukerne, som selv kan
+flytte rundt på modulene.)
+
+Alle moduler har minst to parametere: 
+'aktiv': true eller false, dvs om modulen er slått av eller på. 
+'tittel': tittelen som vises i modul/widget-boksen
+
+Dersom modulen inneholder en liste med elementer hvor antallet 
+elementer skal kunne begrenses ved hjelp av en parameter gjøres 
+dette med en parameter som heter 'grense'.
+*/
+
+$config['moduler']['albuminfo'] = array(
+  'aktiv' => true, 
+  'tittel' => "Albuminfo"
+);
+
+$config['moduler']['artist'] = array(
+  'aktiv' => true, 
+  'tittel' => "Artistinfo"
 );
 
 ?>
