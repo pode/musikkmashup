@@ -227,6 +227,18 @@ function masser_input($s) {
 }
 
 /*
+Teksten som kommer fra LastFM fører av en eller annen grunn ut i intet. 
+Denne funksjonen fjerner foreløpig lenkene, etter hvert vil den endre dem så de peker til 
+rett sted. 
+*/
+function lastfm_lenker($s) {
+
+	$s = preg_replace("/<a .*?>(.*?)<\/a>/i", "$1", $s);
+	return $s;
+	
+}
+
+/*
 Last.fm foretrkker Susanne Lundeng fremfor Lundeng, Susanne
 */
 function avinverter($s) {

@@ -25,7 +25,7 @@ if (!empty($_GET['artist'])) {
 			echo('<p class="artistbilde"><img src="' . $art['image']['large'] . '" alt="' . $art['name'] . '" title="' . $art['name'] . '" /></p>');
 		}
 		if ($art['bio']['summary']) {
-			echo("<p>Biografi fra Last.fm: {$art['bio']['summary']}</p>");
+			echo("<p>Biografi fra Last.fm: " . lastfm_lenker($art['bio']['summary']) . "</p>");
 		}
 		echo("<p>Lignende artister:</p><ul>");
 		foreach ($art['similar'] as $sim) {

@@ -31,7 +31,7 @@ if (!empty($_GET['album']) && !empty($_GET['artist'])) {
 		}
 		// Beskrivelse
 		if ($album['album']['wiki']['summary']) {
-			echo("<p>Beskrivelse fra Last.fm: {$album['album']['wiki']['summary']}</p>");
+			echo("<p>Beskrivelse fra Last.fm: " . lastfm_lenker($album['album']['wiki']['summary'])  . "</p>");
 		}
 		// Mer info
 		echo('<p><a href="' . $album['album']['url'] . '">Les mer hos Last.fm</a></p>');
