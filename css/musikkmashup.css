@@ -49,8 +49,7 @@ img {
 	visibility: hidden;
 }
 
-.artistbilde {
-	float: left; 
+.artistbilde, .albumbilde {
 	margin-right: 1em;	
 }
 
