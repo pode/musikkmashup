@@ -32,9 +32,37 @@ function sru_search ($query, $bib, $limit=100, $postvisning=false) {
 	// Sorter
 	$poster = sorter($poster);
 	
-	// Sjekk om vi skal dele opp i sider
-	if ($antall_poster < $config['pr_side']) {
+	// Sjekk om vi skal vise et utsnitt
+	if ($antall_poster > $config['pr_side']) {
 		
+		// Plukker ut poster som skal vises
+		$side = !empty($_GET['side']) ? $_GET['side'] : 1;
+		$offset = ($side - 1) * $config['pr_side'];
+		$lengde = $config['pr_side'];
+		$poster = array_slice($poster, $offset, $lengde);
+		
+		// Lenker for blaing
+		$forste = $offset + 1;
+		$siste = $forste + $config['pr_side'] - 1;
+		if ($siste > $antall_poster) {
+			$siste = $antall_poster;
+		}
+		$out .= '<p id="blaing">' . "Viser treff $forste - $siste av $antall_poster. ";
+		$blaurl = '?q=' . $_GET['q'] . '&bib=' . $_GET['bib'] . '&sorter=' . $_GET['sorter'] . '&orden=' . $_GET['orden'] . '&side=';
+		if ($side > 1) {
+			$forrigeside = $side - 1;
+			$out .= '<a href="' . $blaurl . $forrigeside . '">Vis forrige side</a> ';
+		} else {
+			$out .= 'Vis forrige side ';
+		}
+		// (($page + 1) * $perPage) &gt; $hits + $perPage
+		if ((($side + 1) * $config['pr_side']) > ($antall_poster + $config['pr_side'])) {
+			$out .= 'Vis neste side ';
+		} else {
+			$nesteside = $side + 1;
+			$out .= '<a href="' . $blaurl . $nesteside . '">Vis neste side</a> ';
+		}
+		$out .= '</p>';
 	}
 
 	// Legg til de sorterte postene i $out
