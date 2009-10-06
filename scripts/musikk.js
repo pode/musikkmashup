@@ -74,7 +74,7 @@ function setArtist(artist) {
 		// Gjør widgetene synlige
 		$(".widget").css({'visibility' : 'visible'});
 		// Gjem artistvelgeren
-		$("#artistvelger").remove();
+		// $("#artistvelger").remove();
 		// Gå igjennom alle widgetene og legg til innhold
 		jQuery.each($(".widget"), function() {
 			var this_widget = this;
