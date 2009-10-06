@@ -34,6 +34,12 @@ img {
 	width: 37%;
 }
 
+#sortering {
+	border: 1px solid grey;
+	padding: 1em;
+	margin-bottom: 1em;	
+}
+
 .basisinfo {
 	margin-bottom: 1em;	
 }

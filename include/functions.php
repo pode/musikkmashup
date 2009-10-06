@@ -4,7 +4,7 @@
 Funksjoner som benyttes av Pode musikkmashup
 */
 
-function sru_search ($query, $bib, $limit=25, $postvisning=false) {
+function sru_search ($query, $bib, $limit=100, $postvisning=false) {
 	
 	global $config;
 
@@ -19,20 +19,97 @@ function sru_search ($query, $bib, $limit=25, $postvisning=false) {
 	}
 	
 	// Hent ut MARC-postene fra strengen i $marcxml
-	$poster = new File_MARCXML($marcxml, File_MARC::SOURCE_STRING);
-
+	$sru_poster = new File_MARCXML($marcxml, File_MARC::SOURCE_STRING);
+	
 	// Gå igjennom postene
 	$antall_poster = 0;
-	while ($post = $poster->next()) {
-		$out .= get_basisinfo($post, $bib, $postvisning);
+	$poster = array();
+	while ($post = $sru_poster->next()) {
+		$poster[] = get_basisinfo($post, $bib, $postvisning);
 		$antall_poster++;
 	}
+	
+	// Sorter
+	$poster = sorter($poster);
+	
+	// Sjekk om vi skal dele opp i sider
+	if ($antall_poster < $config['pr_side']) {
+		
+	}
+
+	// Legg til de sorterte postene i $out
+	foreach ($poster as $post) {
+		$out .= $post['post'];
+	}
+	
 	if ($antall_poster == 0) {
 		$out .= '<p>Beklager, null treff...</p>';	
 	}
 	
 	return $out;
 	
+}
+
+/*
+Sorter postene. Dersom ikke både sorter og orden er satt bruker vi default sortering (år, synkende).
+*/
+function sorter($poster) {
+	
+	if ((!empty($_GET['sorter']) && 
+			($_GET['sorter'] == 'aar' || 
+			 $_GET['sorter'] == 'tittel' ||
+			 $_GET['sorter'] == 'artist')
+			 ) && 
+		(!empty($_GET['orden']) && 
+			($_GET['orden'] == 'stig' ||
+			 $_GET['orden'] == 'synk')
+			 )
+		) {
+			
+		if ($_GET['sorter'] == 'aar' && $_GET['orden'] == 'synk') {
+			usort($poster, "sorter_aar_synkende");
+		} elseif ($_GET['sorter'] == 'aar' && $_GET['orden'] == 'stig') {
+			usort($poster, "sorter_aar_stigende");
+		} elseif ($_GET['sorter'] == 'tittel' && $_GET['orden'] == 'synk') {
+			usort($poster, "sorter_tittel_synkende");
+		} elseif ($_GET['sorter'] == 'tittel' && $_GET['orden'] == 'stig') {
+			usort($poster, "sorter_tittel_stigende");
+		} elseif ($_GET['sorter'] == 'artist' && $_GET['orden'] == 'synk') {
+			usort($poster, "sorter_artist_synkende");
+		} elseif ($_GET['sorter'] == 'artist' && $_GET['orden'] == 'stig') {
+			usort($poster, "sorter_artist_stigende");
+		} 
+		
+	} else {
+		usort($poster, "sorter_aar_synkende");
+	}
+	
+	return $poster;
+	
+}
+
+function sorter_aar_synkende($a, $b) {
+    return strcmp($b["aar"], $a["aar"]);
+}
+
+function sorter_aar_stigende($a, $b) {
+    return strcmp($a["aar"], $b["aar"]);
+}
+
+function sorter_tittel_synkende($a, $b) {
+    return strcmp($b["tittel"], $a["tittel"]);
+}
+
+function sorter_tittel_stigende($a, $b) {
+    return strcmp($a["tittel"], $b["tittel"]);
+}
+
+function sorter_artist_synkende($a, $b) {
+    return strcmp($b["artist"], $a["artist"]);
+}
+
+function sorter_artist_stigende($a, $b) {
+    return strcmp($a["artist"], $b["artist"]);
 }
 
 function sru_postvisning($id, $bib) {
@@ -53,7 +130,8 @@ function sru_postvisning($id, $bib) {
 
 	// Gå igjennom postene
 	while ($post = $poster->next()) {
-		$out .= get_basisinfo($post, $bib, true);
+		$data = get_basisinfo($post, $bib, true);
+		$out .= $data['post'];
 		$out .= get_detaljer($post, $bib);
 	}
 	
@@ -98,6 +176,8 @@ function get_basisinfo($post, $bib, $postvisning) {
 
 	$bibid = marctrim($post->getField("999")->getSubfield("c"));
 
+	// BYGG OPP ENKEL POSTVISNING
+
     $out = '<div class="basisinfo">';
     
     // Tittel
@@ -107,7 +187,9 @@ function get_basisinfo($post, $bib, $postvisning) {
     	if ($config['libraries'][$bib]['item_url']) {
     		$itemurl = $config['libraries'][$bib]['item_url'] . $bibid;
     	}
-    	$out .= '<a href="' . $itemurl . '" class="albumtittel" title="Vis i katalogen til ' . $config['libraries'][$bib]['title'] . '">' . marctrim($post->getField("245")->getSubfield("a")) . '</a>';
+    	// Fjern eventuelle punktum på slutten av tittelen
+    	$tittel = preg_replace("/\.$/", "", marctrim($post->getField("245")->getSubfield("a")));
+    	$out .= '<a href="' . $itemurl . '" class="albumtittel" title="Vis i katalogen til ' . $config['libraries'][$bib]['title'] . '">' . $tittel . '</a>';
     }
     if ($post->getField("245") && $post->getField("245")->getSubfield("b")) {
     	$out .= ' : ' . marctrim($post->getField("245")->getSubfield("b"));
@@ -155,7 +237,34 @@ function get_basisinfo($post, $bib, $postvisning) {
     }
     $out .= '</div>';
     
-    return $out;
+    // HENT UT DATA FOR SORTERING
+    
+    $data = array();
+
+    // Tittel
+   	$data['tittel'] = marctrim($post->getField("245")->getSubfield("a")); 
+    if ($post->getField("245") && $post->getField("245")->getSubfield("b")) {
+    	$data['tittel'] .= " " . marctrim($post->getField("245")->getSubfield("b"));
+    }
+    
+    // Artist
+    if ($post->getField("100") && $post->getField("100")->getSubfield("a")) {
+    	$data['artist'] = marctrim($post->getField("100")->getSubfield("a"));
+    }
+    if ($post->getField("110") && $post->getField("110")->getSubfield("a")) {
+    	$data['artist'] = marctrim($post->getField("110")->getSubfield("a"));
+    }
+    
+    // År
+   	if ($post->getField("260")->getSubfield("c")) {
+   		preg_match("/\d{4}/", marctrim($post->getField("260")->getSubfield("c")), $match);
+   		$data['aar'] = $match[0];
+   	}
+   	
+   	// Legg til post for visning
+    $data['post'] = $out;
+
+    return $data;
 	
 }
 

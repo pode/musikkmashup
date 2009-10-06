@@ -9,6 +9,9 @@ $config['navn'] = 'Podes musikkmashup';
 // Verdier: true eller false
 $config['debug'] = true;
 
+// Hvor mange poster skal vises pr side i hovedvisningen? 
+$config['pr_side'] = 10;
+
 /*
 BIBLIOTEK
 
