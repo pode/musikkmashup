@@ -62,7 +62,10 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	// Søk
 	if (!empty($_GET['q'])) {
 		if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
-			echo(sru_search($_GET['q'], $_GET['bib']));
+			$q = masser_input($_GET['q']);
+			$qu = urlencode($q);
+			$query = '(dc.author=' . $qu . '+or+dc.title=' . $qu . ')+and+dc.title=lydopptak';
+			echo(sru_search($query, $_GET['bib']));
 		} else {
 			echo("Z39.50 søk");	
 		}

@@ -4,32 +4,31 @@
 Funksjoner som benyttes av Pode musikkmashup
 */
 
-function sru_search ($q, $bib) {
+function sru_search ($query, $bib, $limit=25, $postvisning=false) {
 	
 	global $config;
 
 	// Variabel som skal samle opp output
 	$out = "";
 	
-	$q = masser_input($q);
-	
-	$qu = urlencode($q);
-	$query = '(dc.author=' . $qu . '+or+dc.title=' . $qu . ')+and+dc.title=lydopptak';
-	if ($config['debug']) {
-		$out = "<!-- Query: $query -->";
-	}
-	$marcxml = get_sru($query, $bib);
+	$marcxml = get_sru($query, $bib, $limit);
 	
 	if ($config['debug']) {
-		echo("\n\n <!-- \n\n $marcxml \n\n --> \n\n ");
+		$out .= "<!-- Query: $query -->";
+		$out .= "\n\n <!-- \n\n $marcxml \n\n --> \n\n ";
 	}
 	
 	// Hent ut MARC-postene fra strengen i $marcxml
 	$poster = new File_MARCXML($marcxml, File_MARC::SOURCE_STRING);
 
 	// Gå igjennom postene
+	$antall_poster = 0;
 	while ($post = $poster->next()) {
-		$out .= get_basisinfo($post, $bib, false);
+		$out .= get_basisinfo($post, $bib, $postvisning);
+		$antall_poster++;
+	}
+	if ($antall_poster == 0) {
+		$out .= '<p>Beklager, null treff...</p>';	
 	}
 	
 	return $out;
@@ -40,7 +39,7 @@ function sru_postvisning($id, $bib) {
 
 	global $config;
 	
-	$marcxml = get_sru('rec.id=' . urlencode($id), $bib);
+	$marcxml = get_sru('rec.id=' . urlencode($id), $bib, 1);
 	
 	if ($config['debug']) {
 		echo("\n\n <!-- \n\n $marcxml \n\n --> \n\n ");
@@ -62,14 +61,14 @@ function sru_postvisning($id, $bib) {
 	
 }
 
-function get_sru($query, $bib) {
+function get_sru($query, $bib, $limit) {
 	
 	global $config;
 	
 	$version = '1.2';
 	$recordSchema = 'marcxml';
 	$startRecord = 1; 
-	$maximumRecords = 25;
+	$maximumRecords = $limit;
 	
 	// Bygg opp SRU-urlen
 	$sru_url = $config['libraries'][$bib]['sru'];

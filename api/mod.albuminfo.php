@@ -33,7 +33,8 @@ if (!empty($_GET['album']) && !empty($_GET['artist'])) {
 		if ($album['album']['wiki']['summary']) {
 			echo("<p>Beskrivelse fra Last.fm: {$album['album']['wiki']['summary']}</p>");
 		}
-	
+		// Mer info
+		echo('<p><a href="' . $album['album']['url'] . '">Les mer hos Last.fm</a></p>');
 	}
 	
 }

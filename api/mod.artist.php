@@ -32,6 +32,8 @@ if (!empty($_GET['artist'])) {
 			echo('<li><a href="?q=' . urlencode($sim['name']) . '&bib=' . $_GET['bib'] . '">' . $sim['name'] . '</a></li>');
 		}
 		echo("</ul>");
+		// Mer info
+		echo('<p><a href="' . $art['url'] . '">Les mer hos Last.fm</a></p>');
 	} else {
 		// Error: show which error and go no further.
 		echo '<b>Error '.$artist->error['code'].' - </b><i>'.$artist->error['desc'].'</i>';

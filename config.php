@@ -89,7 +89,7 @@ Alle moduler har minst to parametere:
 
 Dersom modulen inneholder en liste med elementer hvor antallet 
 elementer skal kunne begrenses ved hjelp av en parameter gjøres 
-dette med en parameter som heter 'grense'.
+dette med en parameter som heter 'antall'.
 */
 
 $config['moduler']['albuminfo'] = array(
@@ -100,6 +100,18 @@ $config['moduler']['albuminfo'] = array(
 $config['moduler']['artist'] = array(
   'aktiv' => true, 
   'tittel' => "Artistinfo"
+);
+
+$config['moduler']['dvd'] = array(
+  'aktiv' => true, 
+  'tittel' => "DVDer", 
+  'antall' => 10
+);
+
+$config['moduler']['bok'] = array(
+  'aktiv' => true, 
+  'tittel' => "Bøker m.m.", 
+  'antall' => 10
 );
 
 ?>
