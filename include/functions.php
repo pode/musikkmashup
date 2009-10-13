@@ -25,8 +25,171 @@ function podesearch($query, $postvisning=false){
 /*
 Utfører Z39.50-søket og returnerer postene i MARCXML-format, som en streng
 */
+function get_z($ccl, $limit) {
+	
+	$out = '';
+	
+	/*
+	hvis ikke ccl-parameteren er oppgitt får man en tom XML-struktur
+	tilbake med records som rotnode
+	*/
+	if (!isset($ccl))
+	{
+		
+		$out .= "<records>\n</records>";
+	} 
+	/*
+	hvis ccl-parameteren er satt får man MARCXML basert på ccl-
+	parameteren tilbake
+	*/
+	else
+	{
+		
+		$out .= "<records>\n";
+		/*
+		kjører funksjonen yazCclArray som returnerer en array med
+		MARCXML-data basert på $query. syntaksen er 'normarc'. mot
+		deichmanske kan denne byttes til hvertfall USMARC og MARC21
+		*/
+		$fetch = yazCclArray($ccl, 'normarc', $limit);
+		/*
+		henter ut verdien med nøkkelen 'result'. det er her selve
+		dataene ligger lagret. $fetch-arrayen har også en verdi med
+		nøkkel 'hits' som forteller hvor mange records $fetch inneholder
+		*/
+		$data = $fetch['result'];
+		//går gjennom $data-arrayen
+		foreach ($data as $record)
+		{
+			//splitter på nylinjetegn
+			$lines = explode("\n", $record);
+			/*
+			overskriver den første noden i hver record med en
+			'<record>'-node. dette gjør at namespacet blir fjernet
+			og gjør parsing og transformering av XML lettere
+			*/
+			$lines[0] = "<record>";
+			/*
+			samler arrayen $lines til en streng og konverterer til
+			utf-8
+			*/
+			$out .= utf8_encode(implode("\n", $lines));
+		}
+		$out .= "</records>";
+	}
+	
+	return $out;
+	
+}
 
-function get_z($query, $limit) {
+/*
+returnerer en array med XML-data, hvert element i arrayen
+inneholder XML-data om en record. funksjonen fungerer omtrent
+på samme måte som yazCclSearch
+*/
+function yazCclArray($ccl, $syntax = 'marc21', $limit = 20, $host = 'default')
+{
+	
+	global $config;
+	
+	if ($host == 'default') {
+		$host = $config['libraries'][$_GET['bib']]['z3950'];
+	}
+	
+	$zconfig = get_zconfig();
+	$hits = 0;
+	
+	$type = 'xml';
+		
+	$id = yaz_connect($host);
+	yaz_element($id, "F");
+	yaz_syntax($id, $syntax);
+	yaz_range($id, 1, 1);
+	
+	yaz_ccl_conf($id, $zconfig);
+	$cclresult = array();
+	if (!yaz_ccl_parse($id, $ccl, $cclresult))
+	{
+		echo 'Error: '.$cclresult["errorstring"];
+	}
+	else
+	{
+		// NB! Ser ikke ut som Z39.50 fra Bibliofil støtter "sort"
+		// Se nederst her: http://www.bibsyst.no/produkter/bibliofil/z3950.php
+		// PHP/YAZ-funksjonen yaz-sort ville kunne dratt nytte av dette: 
+		// http://no.php.net/manual/en/function.yaz-sort.php
+		// Sort Flags
+		// a Sort ascending
+		// d Sort descending
+		// i Case insensitive sorting
+		// s Case sensitive sorting
+		// Bib1-attributter man kunne sortert på: 
+		// http://www.bibsyst.no/produkter/bibliofil/z/carl.xml
+		// yaz_sort($id, "1=31 di");
+		$rpn = $cclresult["rpn"];
+		yaz_search($id, "rpn", utf8_decode($rpn));
+	}
+	
+	yaz_wait();
+
+	$error = yaz_error($id);
+	if (!empty($error))
+	{
+		echo "Error yazCclArray: $error";
+	}
+	else
+	{
+		$hits = yaz_hits($id);
+	}
+	
+	$data = array();
+	
+	for ($p = 1; $p <= $hits; $p++)
+	{
+		$rec = yaz_record($id, $p, $type);
+		if (empty($rec)) continue;
+		$data[] = $rec;
+		if ($p == $limit) {
+		  break;
+		}
+	}
+	
+	$ret = array("hits" => $hits, "result" => $data);
+	
+	return $ret;
+}
+
+/*
+kvalifikatorsetup til yaz_ccl_conf, disse verdiene er hentet fra
+BIB-1 attributtsettet funnet her:
+http://bibsyst.no/produkter/bibliofil/bib1.php
+ti => 1=4
+ti = tittel
+1 = structure (virker bare med 1 her)
+4 = use attribute
+
+KVALIFIKATORFORKLARING:
+ti -> tittel
+kl -> klassifikasjon (dewey)
+fo -> forfatter
+år -> år
+sp -> språk
+eo -> emneord
+is -> isbn
+tnr -> tittelnummer
+*/
+function get_zconfig() {
+
+	return $config = array(
+		"ti" => "1=4",
+		"kl" => "1=13",
+		"fo" => "1=1003",
+		"år" => "1=31",
+		"sp" => "1=54",
+		"eo" => "1=21",
+		"is" => "1=7",
+		"tnr" => "1=12",
+		"ke" => "1=21");	
 	
 }
 
@@ -204,11 +367,16 @@ function sorter_artist_stigende($a, $b) {
     return strcmp($a["artist"], $b["artist"]);
 }
 
-function sru_postvisning($id) {
+function postvisning($id) {
 
 	global $config;
 	
-	$marcxml = get_sru('rec.id=' . urlencode($id), 1);
+	$marcxml = '';
+	if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
+		$marcxml = get_sru('rec.id=' . urlencode($id), 1);
+	} else {
+		$marcxml = get_z('tnr=' . urlencode($id), 1);
+	}
 	
 	if ($config['debug']) {
 		echo("\n\n <!-- \n\n $marcxml \n\n --> \n\n ");
@@ -241,7 +409,18 @@ function get_basisinfo($post, $postvisning) {
 
 	global $config;
 
-	$bibid = marctrim($post->getField("999")->getSubfield("c"));
+	// Hent ut IDen til posten og sett sammen URLen til posten i katalogen
+	$bibid = '';
+	$itemurl = '';
+	if ($post->getField("999") && $post->getField("999")->getSubfield("c")) {
+		// Hvis 999$c er derfinert har vi SRU-data fra Koha, og kan sette sammen den verdien med item_url-variabelen fra config.php
+		$bibid = marctrim($post->getField("999")->getSubfield("c"));
+		$itemurl = $config['libraries'][$_GET['bib']]['item_url'] . $bibid;
+	} else {
+		// Alternativt finner vi en fiks ferdig URL i 996$u
+		$bibid = substr(marctrim($post->getField("001")), 3);
+		$itemurl = marctrim($post->getField("996")->getSubfield("u"));
+	}
 
 	// BYGG OPP ENKEL POSTVISNING
 
@@ -249,11 +428,6 @@ function get_basisinfo($post, $postvisning) {
     
     // Tittel
     if ($post->getField("245")->getSubfield("a")) {
-    	// Sett sammen URL til posten i katalogen
-    	$itemurl = '';
-    	if ($config['libraries'][$_GET['bib']]['item_url']) {
-    		$itemurl = $config['libraries'][$_GET['bib']]['item_url'] . $bibid;
-    	}
     	// Fjern eventuelle punktum på slutten av tittelen
     	$tittel = preg_replace("/\.$/", "", marctrim($post->getField("245")->getSubfield("a")));
     	$out .= '<a href="' . $itemurl . '" class="albumtittel" title="Vis i katalogen til ' . $config['libraries'][$_GET['bib']]['title'] . '">' . $tittel . '</a>';

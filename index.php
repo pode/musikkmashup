@@ -38,7 +38,7 @@ echo('
 //skriver nedtrekksliste
 foreach ($config['libraries'] as $key => $value)
 {
-	if ($selected==$key)
+	if ($_GET['bib'] == $key)
 		echo('<option selected="selected" value="' . $key . '">' . $value['title'] . '</option>' . "\n");
 	else
 		echo('<option value="' . $key . '">' . $value['title'] . '</option>' . "\n");
@@ -93,21 +93,21 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 		// Søk
 		if (!empty($_GET['q'])) {
 			$q = masser_input($_GET['q']);
-			$qu = urlencode($q);
-			$query = '(dc.author=' . $qu . '+or+dc.title=' . $qu . ')+and+dc.title=lydopptak';
+			$query = '';
+			if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
+				$qu = urlencode($q);
+				$query = '(dc.author=' . $qu . '+or+dc.title=' . $qu . ')+and+dc.title=lydopptak';
+			} else {
+				$query = '(fo=' . $q . ' or ti=' . $q . ') and ti=lydopptak';
+			}
 			echo(podesearch($query));
 		}
 	}
 
 	// Postvisning	
 	if (!empty($_GET['id'])) {
-		if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
-			echo(sru_postvisning($_GET['id'], $_GET['bib']));
-		} else {
-			echo(z_postvisning($_GET['id'], $_GET['bib']));	
-		}
+		echo(postvisning($_GET['id']));
 	}
-
 
 	echo('</div>');
 	
