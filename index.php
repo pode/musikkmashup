@@ -22,7 +22,8 @@ echo('
 <script src="scripts/musikk.js" type="text/javascript"></script>
 ');
 
-echo("<body>");
+echo('<body>');
+echo('<div id="content">');
 echo("<h1>{$config['navn']}</h1>");
 
 /* SØKESKJERM */
@@ -136,6 +137,8 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 
 }
 
+// Avslutter div content
+echo('</div>');
 echo("</body>\n</html>");
 
 ?>

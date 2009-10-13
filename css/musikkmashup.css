@@ -14,24 +14,31 @@ img {
 	text-align: center;	
 }
 
+#content {
+	margin:0 auto;
+	width: 900px;	
+}
+
 #main {
 	margin-right: 10%;	
 	margin-left: 10%;
 }
 
-#left, #right {
-	border: 1px solid black;	
-	padding: 1em;
+#left, #right {	
+	min-height:520px;
 }
 
 #left {
+	border: 1px solid black;
+	padding: 1em;
 	float: left;
-	width: 56%;
+	width: 350px;
 }
 
 #right {
 	float: right;
-	width: 37%;
+	padding-left: 15px;
+	width: 320px;
 }
 
 #sortering {
