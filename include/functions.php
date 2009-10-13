@@ -158,6 +158,7 @@ function sru_postvisning($id, $bib) {
 
 	// Gå igjennom postene
 	while ($post = $poster->next()) {
+		$out .= '<p class="tilbake"><a href="javascript:history.go(-1)">Tilbake til trefflista</a></p>';
 		$data = get_basisinfo($post, $bib, true);
 		$out .= $data['post'];
 		$out .= get_detaljer($post, $bib);
@@ -224,20 +225,28 @@ function get_basisinfo($post, $bib, $postvisning) {
     }
     
     // Artist
+    $artist = '';
+    $beskrivelse = '';
+    // Sjekk om vi har artisten i 100 eller 110
     if ($post->getField("100") && $post->getField("100")->getSubfield("a")) {
-    	$out .= '<br />';
-    	$out .= '<span class="artist">' . marctrim($post->getField("100")->getSubfield("a")) . '</span>';
+    	$artist = marctrim($post->getField("100")->getSubfield("a"));
     	if ($post->getField("100")->getSubfield("q")) {
-    		$out .= ' (' . marctrim($post->getField("100")->getSubfield("q")) . ')';
+    		$beskrivelse = marctrim($post->getField("100")->getSubfield("q"));
     	}
     }
     if ($post->getField("110") && $post->getField("110")->getSubfield("a")) {
-    	$out .= '<br />';
-    	$out .= '<span class="artist">' . marctrim($post->getField("110")->getSubfield("a")) . '</span>';
+    	$artist = marctrim($post->getField("110")->getSubfield("a"));
     	if ($post->getField("110")->getSubfield("q")) {
-    		$out .= ' (' . marctrim($post->getField("110")->getSubfield("q")) . ')';
+    		$beskrivelse = marctrim($post->getField("110")->getSubfield("q"));
     	}
     }
+    if ($artist != '') {
+    	$out .= '<br /><a href="?q=' . urlencode($artist) . '&bib=' . $_GET['bib'] . '" class="artist">' . $artist . '</a>';
+    	if ($beskrivelse != '') {
+    		$out .= " ($beskrivelse)";
+    	}
+    }
+    // Hvis vi ikke fant noe i 100 eller 110 ser v iom vi finner noe i 511
     if (!$post->getField("100") && !$post->getField("110")) {
     	if ($post->getField("511") && $post->getField("511")->getSubfield("a")) {
     		$out .= '<br />';

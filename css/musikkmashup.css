@@ -70,6 +70,10 @@ img {
 	margin-right: 1em;	
 }
 
+.tilbake {
+	text-align: right;
+}
+
 /* Widgets */
 .right-col-box {
 	border: 1px solid black;
