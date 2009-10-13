@@ -4,17 +4,81 @@
 Funksjoner som benyttes av Pode musikkmashup
 */
 
-function sru_search ($query, $bib, $limit=100, $postvisning=false) {
+/*
+Tar i mot det ferdige søkeuttrykket og bestemmer om det skal økes med SRU 
+eller Z39.50, basert på info fra config.php. 
+*/
+function podesearch($query, $postvisning=false){
 	
 	global $config;
 
-	// Variabel som skal samle opp output
-	$out = "";
+	$marcxml = '';
+	if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
+		$marcxml = get_sru($query, $config['maks_poster']);
+	} else { 
+		$marcxml = get_z($query, $config['maks_poster']);
+	}
+	return get_poster($marcxml, $postvisning);
 	
-	$marcxml = get_sru($query, $bib, $limit);
+}
+
+/*
+Utfører Z39.50-søket og returnerer postene i MARCXML-format, som en streng
+*/
+
+function get_z($query, $limit) {
 	
+}
+
+/*
+Utfører SRU-søket og returnerer postene i MARCXML-format, som en streng. 
+Argumenter: 
+query = det søkebegrepet som det skal søkes etter
+limit = maks antall poster som skal returneres
+*/
+function get_sru($query, $limit) {
+	
+	global $config;
+	
+	$version = '1.2';
+	$recordSchema = 'marcxml';
+	$startRecord = 1; 
+	$maximumRecords = $limit;
+	
+	// Bygg opp SRU-urlen
+	$sru_url = $config['libraries'][$_GET['bib']]['sru'];
+
+	$sru_url .= "?operation=searchRetrieve";
+	$sru_url .= "&version=$version";
+	$sru_url .= "&query=$query";
+	$sru_url .= "&recordSchema=$recordSchema";
+	$sru_url .= "&startRecord=$startRecord";
+	$sru_url .= "&maximumRecords=$maximumRecords";
+
+	// Hent SRU-data
+	$sru_data = file_get_contents($sru_url) or exit("Feil");
+	
+	// Massér SRU-dataene slik at vi lett kan nehandle dem med funksjonene fra File_MARC
+	$sru_data = str_replace("<record xmlns=\"http://www.loc.gov/MARC21/slim\">", "<record>", $sru_data);
+	preg_match_all('/(<record>.*?<\/record>)/si', $sru_data, $treff);
+	$marcxml = implode("\n\n", $treff[0]);
+	$marcxml = '<?xml version="1.0" encoding="utf-8"?>' . "\n<collection>\n$marcxml\n</collection>";
+	
+	return $marcxml;
+
+}
+
+/*
+Tar i mot MARC-poster i form av en streng med MARCXML. 
+Returnerer ferdig formatert treffliste med navigering. 
+*/
+function get_poster ($marcxml, $postvisning) {
+	
+	global $config; 
+	
+	$out = '';
+
 	if ($config['debug']) {
-		$out .= "<!-- Query: $query -->";
 		$out .= "\n\n <!-- \n\n $marcxml \n\n --> \n\n ";
 	}
 	
@@ -25,7 +89,7 @@ function sru_search ($query, $bib, $limit=100, $postvisning=false) {
 	$antall_poster = 0;
 	$poster = array();
 	while ($post = $sru_poster->next()) {
-		$poster[] = get_basisinfo($post, $bib, $postvisning);
+		$poster[] = get_basisinfo($post, $postvisning);
 		$antall_poster++;
 	}
 	
@@ -140,11 +204,11 @@ function sorter_artist_stigende($a, $b) {
     return strcmp($a["artist"], $b["artist"]);
 }
 
-function sru_postvisning($id, $bib) {
+function sru_postvisning($id) {
 
 	global $config;
 	
-	$marcxml = get_sru('rec.id=' . urlencode($id), $bib, 1);
+	$marcxml = get_sru('rec.id=' . urlencode($id), 1);
 	
 	if ($config['debug']) {
 		echo("\n\n <!-- \n\n $marcxml \n\n --> \n\n ");
@@ -159,47 +223,21 @@ function sru_postvisning($id, $bib) {
 	// Gå igjennom postene
 	while ($post = $poster->next()) {
 		$out .= '<p class="tilbake"><a href="javascript:history.go(-1)">Tilbake til trefflista</a></p>';
-		$data = get_basisinfo($post, $bib, true);
+		$data = get_basisinfo($post, true);
 		$out .= $data['post'];
-		$out .= get_detaljer($post, $bib);
+		$out .= get_detaljer($post);
 	}
 	
 	return $out;
 	
 }
 
-function get_sru($query, $bib, $limit) {
-	
-	global $config;
-	
-	$version = '1.2';
-	$recordSchema = 'marcxml';
-	$startRecord = 1; 
-	$maximumRecords = $limit;
-	
-	// Bygg opp SRU-urlen
-	$sru_url = $config['libraries'][$bib]['sru'];
-	$sru_url .= "?operation=searchRetrieve";
-	$sru_url .= "&version=$version";
-	$sru_url .= "&query=$query";
-	$sru_url .= "&recordSchema=$recordSchema";
-	$sru_url .= "&startRecord=$startRecord";
-	$sru_url .= "&maximumRecords=$maximumRecords";
-	
-	// Hent SRU-data
-	$sru_data = file_get_contents($sru_url) or exit("Feil");
-	
-	// Massér SRU-dataene slik at vi lett kan nehandle dem med funksjonene fra File_MARC
-	$sru_data = str_replace("<record xmlns=\"http://www.loc.gov/MARC21/slim\">", "<record>", $sru_data);
-	preg_match_all('/(<record>.*?<\/record>)/si', $sru_data, $treff);
-	$marcxml = implode("\n\n", $treff[0]);
-	$marcxml = '<?xml version="1.0" encoding="utf-8"?>' . "\n<collection>\n$marcxml\n</collection>";
-	
-	return $marcxml;
-
-}
-
-function get_basisinfo($post, $bib, $postvisning) {
+/*
+Henter ut grunnleggende informasjon som tittel, artist, selskap, år fra en post
+og returnerer dem ferdig formattert. Samtidig bygges det opp et array med tittel, 
+artist og år som brukes ved sortering av postene. 
+*/
+function get_basisinfo($post, $postvisning) {
 
 	global $config;
 
@@ -213,12 +251,12 @@ function get_basisinfo($post, $bib, $postvisning) {
     if ($post->getField("245")->getSubfield("a")) {
     	// Sett sammen URL til posten i katalogen
     	$itemurl = '';
-    	if ($config['libraries'][$bib]['item_url']) {
-    		$itemurl = $config['libraries'][$bib]['item_url'] . $bibid;
+    	if ($config['libraries'][$_GET['bib']]['item_url']) {
+    		$itemurl = $config['libraries'][$_GET['bib']]['item_url'] . $bibid;
     	}
     	// Fjern eventuelle punktum på slutten av tittelen
     	$tittel = preg_replace("/\.$/", "", marctrim($post->getField("245")->getSubfield("a")));
-    	$out .= '<a href="' . $itemurl . '" class="albumtittel" title="Vis i katalogen til ' . $config['libraries'][$bib]['title'] . '">' . $tittel . '</a>';
+    	$out .= '<a href="' . $itemurl . '" class="albumtittel" title="Vis i katalogen til ' . $config['libraries'][$_GET['bib']]['title'] . '">' . $tittel . '</a>';
     }
     if ($post->getField("245") && $post->getField("245")->getSubfield("b")) {
     	$out .= ' : ' . marctrim($post->getField("245")->getSubfield("b"));
@@ -270,7 +308,7 @@ function get_basisinfo($post, $bib, $postvisning) {
     	}
     }
     if (!$postvisning) {
-	    $out .= ' [<a href="?bib=' . $bib . '&id=' . $bibid . '">Vis detaljer</a>]';
+	    $out .= ' [<a href="?bib=' . $_GET['bib'] . '&id=' . $bibid . '">Vis detaljer</a>]';
     }
     $out .= '</div>';
     
@@ -305,7 +343,7 @@ function get_basisinfo($post, $bib, $postvisning) {
 	
 }
 
-function get_detaljer($post, $bib) {
+function get_detaljer($post) {
 
 	$out = '<div class="detaljer">';
 	
@@ -321,7 +359,7 @@ function get_detaljer($post, $bib) {
 			if ($field740->getIndicator(2) == 2) {
 				$tittel = marctrim($field740->getSubfield("a"));
 				$tittelu = urlencode($tittel);
-	    		$out .= '<li><a href="?q=' . $tittelu . '&bib=' . $bib . '">' . $tittel . '</a></li>';
+	    		$out .= '<li><a href="?q=' . $tittelu . '&bib=' . $_GET['bib'] . '">' . $tittel . '</a></li>';
 			}
 	    }
 	    $out .= '</ul>';
@@ -338,7 +376,7 @@ function get_detaljer($post, $bib) {
 		$out .= '<p>Medvirkende:</p><ul>';
 		foreach ($post->getFields("700") as $med) {
 			$med = marctrim($med->getSubfield("a"));
-			$out .= '<li><a href="?q=' . urlencode($med) . '&bib=' . $bib . '">' . $med . '</a></li>';
+			$out .= '<li><a href="?q=' . urlencode($med) . '&bib=' . $_GET['bib'] . '">' . $med . '</a></li>';
 		}
 		$out .= '</ul>';
 	}

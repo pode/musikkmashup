@@ -7,8 +7,10 @@ $config['navn'] = 'Podes musikkmashup';
 
 // Skal vi skrive ut litt ekstra debug-info? 
 // Verdier: true eller false
-$config['debug'] = false;
+$config['debug'] = true;
 
+// Hvor mange poster skal maksimalt hentes? 
+$config['maks_poster'] = 100;
 // Hvor mange poster skal vises pr side i hovedvisningen? 
 $config['pr_side'] = 10;
 
