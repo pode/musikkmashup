@@ -1,3 +1,6 @@
+// Globale variabler
+var antallArtister = 0;
+
 // Dette er en jQuery funksjon som automatisk kjøres når hele siden er lastet inn 
 // (dvs, egentlig når DOMen er klar)
 $(function(){
@@ -34,7 +37,7 @@ $(function(){
 	// alert(artister);
 	
 	//Sjekker hvor mange artister vi har funnet
-	var antallArtister = artister.length;
+	antallArtister = artister.length;
 	if (antallArtister == 0) {
 	
 		// 0 artister
@@ -73,8 +76,10 @@ function setArtist(artist) {
 		
 		// Gjør widgetene synlige
 		$(".widget").css({'visibility' : 'visible'});
-		// Gjem artistvelgeren
-		// $("#artistvelger").remove();
+		// Gjem artistvelgeren, hvis vi bare har en artist
+		if (antallArtister == 1) {
+			$("#artistvelger").remove();
+		}
 		// Gå igjennom alle widgetene og legg til innhold
 		jQuery.each($(".widget"), function() {
 			var this_widget = this;
