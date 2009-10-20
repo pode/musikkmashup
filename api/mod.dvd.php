@@ -16,7 +16,7 @@ if (!empty($_GET['artist'])) {
 		$qu = urlencode($q);
 		$query = "dc.author=$qu+and+dc.title=dvd";
 	} else {
-		$query = "fo=$q and ti=dvd";
+		$query = "(fo=$q or in=$q) and ti=dvd";
 	}
 
 	echo(modulsearch($query, 'dvd'));

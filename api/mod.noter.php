@@ -16,7 +16,7 @@ if (!empty($_GET['artist'])) {
 		$qu = urlencode($q);
 		$query = "dc.author=$qu+and+dc.title=musikktrykk";
 	} else {
-		$query = "fo=$q and ti=msuikktrykk";
+		$query = "(fo=$q or in=$q or eo=$q) and ti=musikktrykk";
 	}
 
 	echo(modulsearch($query, 'noter'));

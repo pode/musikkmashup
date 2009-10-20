@@ -16,7 +16,7 @@ if (!empty($_GET['artist'])) {
 		$qu = urlencode($q);
 		$query = "(dc.author=$qu+or+dc.subject=$qu)+not+(dc.title=lydopptak+or+dc.title=video+or+dc.title=musikktrykk)";
 	} else {
-		$query = "(fo=$q or eo=$q) not (ti=lydopptak or ti=video or ti=musikktrykk)";
+		$query = "(fo=$q or in=$q or eo=$q) not (ti=lydopptak or ti=video or ti=musikktrykk)";
 	}
 
 	echo(modulsearch($query, 'dvd'));
