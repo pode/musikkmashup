@@ -113,6 +113,12 @@ $config['moduler']['dvd'] = array(
   'antall' => 10
 );
 
+$config['moduler']['noter'] = array(
+  'aktiv' => true, 
+  'tittel' => "Noter", 
+  'antall' => 10
+);
+
 $config['moduler']['bok'] = array(
   'aktiv' => true, 
   'tittel' => "Bøker m.m.", 
