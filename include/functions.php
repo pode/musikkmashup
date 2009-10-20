@@ -14,11 +14,11 @@ function podesearch($query, $postvisning=false){
 
 	$marcxml = '';
 	if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
-		$marcxml = get_sru($query, $config['maks_poster']);
+		$marcxml = get_sru($query);
 	} else { 
-		$marcxml = get_z($query, $config['maks_poster']);
+		$marcxml = get_z($query);
 	}
-	return get_poster($marcxml, $postvisning);
+	return get_poster($marcxml, $config['maks_poster'], $postvisning);
 	
 }
 
@@ -32,18 +32,18 @@ function modulsearch($query, $modul){
 
 	$marcxml = '';
 	if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
-		$marcxml = get_sru($query, $config['moduler'][$modul]['antall']);
+		$marcxml = get_sru($query);
 	} else { 
-		$marcxml = get_z($query, $config['moduler'][$modul]['antall']);
+		$marcxml = get_z($query);
 	}
-	return get_poster($marcxml, true);
+	return get_poster($marcxml, $config['moduler'][$modul]['antall'], true);
 	
 }
 
 /*
 Utfører Z39.50-søket og returnerer postene i MARCXML-format, som en streng
 */
-function get_z($ccl, $limit) {
+function get_z($ccl) {
 	
 	$out = '';
 	
@@ -69,7 +69,7 @@ function get_z($ccl, $limit) {
 		MARCXML-data basert på $query. syntaksen er 'normarc'. mot
 		deichmanske kan denne byttes til hvertfall USMARC og MARC21
 		*/
-		$fetch = yazCclArray($ccl, 'normarc', $limit);
+		$fetch = yazCclArray($ccl, 'normarc');
 		/*
 		henter ut verdien med nøkkelen 'result'. det er her selve
 		dataene ligger lagret. $fetch-arrayen har også en verdi med
@@ -105,7 +105,7 @@ returnerer en array med XML-data, hvert element i arrayen
 inneholder XML-data om en record. funksjonen fungerer omtrent
 på samme måte som yazCclSearch
 */
-function yazCclArray($ccl, $syntax = 'marc21', $limit = 20, $host = 'default')
+function yazCclArray($ccl, $syntax = 'marc21', $host = 'default')
 {
 	
 	global $config;
@@ -151,12 +151,9 @@ function yazCclArray($ccl, $syntax = 'marc21', $limit = 20, $host = 'default')
 	yaz_wait();
 
 	$error = yaz_error($id);
-	if (!empty($error))
-	{
+	if (!empty($error))	{
 		echo "Error yazCclArray: $error";
-	}
-	else
-	{
+	} else {
 		$hits = yaz_hits($id);
 	}
 	
@@ -167,7 +164,7 @@ function yazCclArray($ccl, $syntax = 'marc21', $limit = 20, $host = 'default')
 		$rec = yaz_record($id, $p, $type);
 		if (empty($rec)) continue;
 		$data[] = $rec;
-		if ($p == $limit) {
+		if ($p == $config['maks_poster']) {
 		  break;
 		}
 	}
@@ -218,14 +215,14 @@ Argumenter:
 query = det søkebegrepet som det skal søkes etter
 limit = maks antall poster som skal returneres
 */
-function get_sru($query, $limit) {
+function get_sru($query) {
 	
 	global $config;
 	
 	$version = '1.2';
 	$recordSchema = 'marcxml';
 	$startRecord = 1; 
-	$maximumRecords = $limit;
+	$maximumRecords = $config['maks_poster'];
 	
 	// Bygg opp SRU-urlen
 	$sru_url = $config['libraries'][$_GET['bib']]['sru'];
@@ -254,7 +251,7 @@ function get_sru($query, $limit) {
 Tar i mot MARC-poster i form av en streng med MARCXML. 
 Returnerer ferdig formatert treffliste med navigering. 
 */
-function get_poster ($marcxml, $postvisning) {
+function get_poster ($marcxml, $limit, $postvisning) {
 	
 	global $config; 
 	
@@ -265,21 +262,27 @@ function get_poster ($marcxml, $postvisning) {
 	}
 	
 	// Hent ut MARC-postene fra strengen i $marcxml
-	$sru_poster = new File_MARCXML($marcxml, File_MARC::SOURCE_STRING);
+	$xml_poster = new File_MARCXML($marcxml, File_MARC::SOURCE_STRING);
 	
 	// Gå igjennom postene
 	$antall_poster = 0;
 	$poster = array();
-	while ($post = $sru_poster->next()) {
+	while ($post = $xml_poster->next()) {
 		$poster[] = get_basisinfo($post, $postvisning);
 		$antall_poster++;
 	}
 	
 	// Sorter
 	$poster = sorter($poster);
+
+	// Sjekk om $limit er mindre enn det totale antallet poster
+	// Hvis ja: plukk ut de $limit første postene
+	if ($antall_poster > $limit) {
+		$poster = array_slice($poster, 0, $limit);	
+		$out .= "<p>Viser $limit av $antall_poster treff</p>";
 	
 	// Sjekk om vi skal vise et utsnitt
-	if ($antall_poster > $config['pr_side']) {
+	} elseif ($antall_poster > $config['pr_side']) {
 		
 		// Plukker ut poster som skal vises
 		$side = !empty($_GET['side']) ? $_GET['side'] : 1;
