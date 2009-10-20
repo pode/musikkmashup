@@ -98,7 +98,7 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 				$qu = urlencode($q);
 				$query = '(dc.author=' . $qu . '+or+dc.title=' . $qu . ')+and+dc.title=lydopptak';
 			} else {
-				$query = '(fo=' . $q . ' or ti=' . $q . ') and ti=lydopptak';
+				$query = "(fo=$q or ti=$q) and ti=lydopptak";
 			}
 			echo(podesearch($query));
 		}

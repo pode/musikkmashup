@@ -10,14 +10,16 @@ include_once('../include/functions.php');
 
 if (!empty($_GET['artist'])) {
 	
+	$q = masser_input($_GET['artist']);
+	$query = '';
 	if ($config['libraries'][$_GET['bib']]['sru']) {
-			$q = masser_input($_GET['artist']);
-			$qu = urlencode($q);
-			$query = '(dc.author=' . $qu . '+or+dc.subject=' . $qu . ')+not+(dc.title=lydopptak+or+dc.title=video)';
-			echo(sru_search($query, $_GET['bib'], $config['moduler']['dvd']['antall'], true));
+		$qu = urlencode($q);
+		$query = "(dc.author=$qu+or+dc.subject=$qu)+not+(dc.title=lydopptak+or+dc.title=video)";
 	} else {
-		echo('<p>Z39.50 - kommer...</p>');	
+		$query = "(fo=$q or eo=$q) not (ti=lydopptak or title=video)";
 	}
+
+	echo(modulsearch($query, 'dvd'));
 	
 }
 

@@ -23,6 +23,24 @@ function podesearch($query, $postvisning=false){
 }
 
 /*
+Tar i mot det ferdige søkeuttrykket og bestemmer om det skal økes med SRU 
+eller Z39.50, basert på info fra config.php. 
+*/
+function modulsearch($query, $modul){
+	
+	global $config;
+
+	$marcxml = '';
+	if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
+		$marcxml = get_sru($query, $config['moduler'][$modul]['antall']);
+	} else { 
+		$marcxml = get_z($query, $config['moduler'][$modul]['antall']);
+	}
+	return get_poster($marcxml, true);
+	
+}
+
+/*
 Utfører Z39.50-søket og returnerer postene i MARCXML-format, som en streng
 */
 function get_z($ccl, $limit) {
