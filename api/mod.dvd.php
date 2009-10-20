@@ -21,13 +21,6 @@ if (!empty($_GET['artist'])) {
 
 	echo(modulsearch($query, 'dvd'));
 	
-//	if ($config['libraries'][$_GET['bib']]['sru']) {
-//			$query = 'dc.author=' . $qu . '+and+dc.title=dvd';
-//			echo(sru_search($query, $_GET['bib'], $config['moduler']['dvd']['antall'], true));
-//	} else {
-//		echo('<p>Z39.50 - kommer...</p>');	
-//	}
-	
 }
 
 ?>
