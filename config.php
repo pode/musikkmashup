@@ -10,9 +10,9 @@ $config['navn'] = 'Podes musikkmashup';
 $config['debug'] = true;
 
 // Hvor mange poster skal maksimalt hentes? 
-$config['maks_poster'] = 100;
+$config['maks_poster'] = 10000;
 // Hvor mange poster skal vises pr side i hovedvisningen? 
-$config['pr_side'] = 10;
+$config['pr_side'] = 10000;
 
 /*
 BIBLIOTEK

@@ -308,6 +308,11 @@ function get_poster ($marcxml, $postvisning) {
 			$out .= '<a href="' . $blaurl . $nesteside . '">Vis neste side</a> ';
 		}
 		$out .= '</p>';
+		
+	} else {
+		
+		$out .= "<p>Viser $antall_poster av $antall_poster treff</p>";
+		
 	}
 
 	// Legg til de sorterte postene i $out
