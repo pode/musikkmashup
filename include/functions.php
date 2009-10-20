@@ -528,7 +528,7 @@ function get_basisinfo($post, $postvisning) {
     }
     
     // År
-   	if ($post->getField("260")->getSubfield("c")) {
+   	if ($post->getField("260") && $post->getField("260")->getSubfield("c")) {
    		preg_match("/\d{4}/", marctrim($post->getField("260")->getSubfield("c")), $match);
    		$data['aar'] = $match[0];
    	}
