@@ -31,8 +31,9 @@ echo("<h1>{$config['navn']}</h1>");
 echo('
 <div class="searchform">
 <form method="get" action="">
-<p>
-Artist/album: <input type="text" size="50" name="q" value="' . $_GET['q'] . '" />
+<p>');
+echo($config['ledetekst']);
+echo('<input type="text" size="50" name="q" value="' . $_GET['q'] . '" />
 <select name="bib">
 ');
 //skriver nedtrekksliste

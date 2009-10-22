@@ -5,6 +5,9 @@
 // Navnet som vises i title-taggen og øverst på alle sider
 $config['navn'] = 'Podes musikkmashup';
 
+// Ledetekst for søkeboksen
+$config['ledetekst'] = 'Artist/album: ';
+
 // Skal vi skrive ut litt ekstra debug-info? 
 // Verdier: true eller false
 $config['debug'] = true;
