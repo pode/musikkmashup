@@ -119,7 +119,7 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	
 	echo('<div id="right">');
 
-	echo('<div id="artistvelger"><form><select name="q" id="artistvalg" onChange="setArtist(artistvalg.value)"><option>Velg artist...</option></select></form></div>');
+	echo('<div id="artistvelger"><form><select name="q" id="artistvalg" onChange="setArtist(this.options[this.selectedIndex].value)"><option>Velg artist...</option></select></form></div>');
 
 	foreach ($config['moduler'] as $key => $mod) {
 		if ($mod['aktiv']) {
