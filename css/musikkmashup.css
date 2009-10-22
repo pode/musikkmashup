@@ -1,5 +1,6 @@
 html {
-	font-family: sans-serif; 	
+	font-family: sans-serif;
+	font-size: small; 
 }
 
 h1 {
@@ -53,6 +54,7 @@ img {
 .antall-poster {
 	padding-left: 1em;
 	padding-right: 1em;
+	font-size: x-small; 
 }
 
 .basisinfo {
@@ -63,6 +65,11 @@ img {
 
 .albumtittel {
 	font-weight: bold;	
+}
+
+.detaljer {
+	padding-left: 1em;
+	padding-right: 1em;	
 }
 
 #artistvelger {
@@ -78,6 +85,7 @@ img {
 
 .tilbake {
 	text-align: right;
+	padding-right: 1em;
 }
 
 /* Widgets */
@@ -102,4 +110,17 @@ img {
 .widget-content {
 	padding-left: 1em;
 	padding-right: 1em;
+}
+
+.widget-content .overskrift {
+	font-size: medium; 
+	font-weight: bold;	
+}
+
+.lignende-artister {
+	font-weight: bold;	
+}
+
+.les-mer {
+	font-size: x-small;	
 }

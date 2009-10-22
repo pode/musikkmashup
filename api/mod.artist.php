@@ -20,20 +20,20 @@ if (!empty($_GET['artist'])) {
 		'artist' => avinverter($_GET['artist'])
 	);
 	if ( $art = $artist->getinfo($methodVars) ) {
-		echo("<p>{$art['name']}</p>");
+		echo('<p class="overskrift">' . $art['name'] . '</p>');
 		if ($art['image']['large']) {
 			echo('<p class="artistbilde"><img src="' . $art['image']['large'] . '" alt="' . $art['name'] . '" title="' . $art['name'] . '" /></p>');
 		}
 		if ($art['bio']['summary']) {
 			echo('<p>' . lastfm_lenker($art['bio']['summary']) . '</p>');
 		}
-		echo("<p>Lignende artister:</p><ul>");
+		echo('<p class="lignende-artister">Lignende artister:</p><ul>');
 		foreach ($art['similar'] as $sim) {
 			echo('<li><a href="?q=' . urlencode($sim['name']) . '&bib=' . $_GET['bib'] . '">' . $sim['name'] . '</a></li>');
 		}
 		echo("</ul>");
 		// Mer info
-		echo('<p><a href="' . $art['url'] . '">Les mer hos Last.fm</a></p>');
+		echo('<p class="les-mer"><a href="' . $art['url'] . '">Les mer hos Last.fm</a></p>');
 	} else {
 		// Error: show which error and go no further.
 		echo '<b>Error '.$artist->error['code'].' - </b><i>'.$artist->error['desc'].'</i>';

@@ -24,7 +24,7 @@ if (!empty($_GET['album']) && !empty($_GET['artist'])) {
 			exit;
 		}
 		// Tittel
-		echo("<p>{$album['album']['name']}</p>");
+		echo('<p class="overskrift">' . $album['album']['name'] . '</p>');
 		// Bilde
 		if ($album['album']['image'][2]['#text']) {
 			echo('<p class="albumbilde"><img src="' . $album['album']['image'][2]['#text'] . '" alt="' . $album['album']['name'] . '" title="' . $album['album']['name'] . '" /></p>');
@@ -34,7 +34,7 @@ if (!empty($_GET['album']) && !empty($_GET['artist'])) {
 			echo('<p>' . lastfm_lenker($album['album']['wiki']['summary'])  . '</p>');
 		}
 		// Mer info
-		echo('<p><a href="' . $album['album']['url'] . '">Les mer hos Last.fm</a></p>');
+		echo('<p class="les-mer"><a href="' . $album['album']['url'] . '">Les mer hos Last.fm</a></p>');
 	}
 	
 }
