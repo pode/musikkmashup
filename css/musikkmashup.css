@@ -95,7 +95,8 @@ img {
 }
 
 .undertittel {
-	font-size: x-small;	
+	font-size: x-small;
+	font-weight: normal;	
 }
 
 .widget-content {
