@@ -454,10 +454,18 @@ function get_basisinfo($post, $postvisning) {
     $out = '<div class="basisinfo">';
     
     // Tittel
-    if ($post->getField("245")->getSubfield("a")) {
+    if ($post->getField("245") && $post->getField("245")->getSubfield("a")) {
     	// Fjern eventuelle punktum på slutten av tittelen
     	$tittel = preg_replace("/\.$/", "", marctrim($post->getField("245")->getSubfield("a")));
-    	$out .= '<a href="' . $itemurl . '" class="albumtittel" title="Vis i katalogen til ' . $config['libraries'][$_GET['bib']]['title'] . '">' . $tittel . '</a>';
+
+		if ($postvisning) {
+			// Vi lenker ikke til posten når vi er inne på den
+			$out .= '<span class="albumtittel">' . $tittel . '</span>';
+
+		} else {
+			$out .= '<a href="?bib=' . $_GET['bib'] . '&id=' . $bibid . '" title="Vis detaljer" class="albumtittel">' . $tittel . '</a>';
+		}
+
     }
     if ($post->getField("245") && $post->getField("245")->getSubfield("b")) {
     	$out .= ' : ' . marctrim($post->getField("245")->getSubfield("b"));
@@ -508,9 +516,7 @@ function get_basisinfo($post, $postvisning) {
     		$out .= marctrim($post->getField("260")->getSubfield("c"));
     	}
     }
-    if (!$postvisning) {
-	    $out .= ' [<a href="?bib=' . $_GET['bib'] . '&id=' . $bibid . '">Vis detaljer</a>]';
-    }
+    $out .= ' <!-- [<a href="' . $itemurl . '" title="Vis i katalogen til ' . $config['libraries'][$_GET['bib']]['title'] . '">Vis i katalogen</a>] -->';
     $out .= '</div>';
     
     // HENT UT DATA FOR SORTERING
