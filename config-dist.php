@@ -80,7 +80,7 @@ http://www.last.fm/api/account
 */
 
 $config['lastfm'] = array(
-	'api_key' => 'b1e5430e679a81219cd8ea2d0e624aaa', 
+	'api_key' => 'Lim inn din API-nøkkel her', 
 	'api_root' => 'http://ws.audioscrobbler.com/2.0/'
 );
 
