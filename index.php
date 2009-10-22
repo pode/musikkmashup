@@ -124,7 +124,11 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	foreach ($config['moduler'] as $key => $mod) {
 		if ($mod['aktiv']) {
 			echo('<div class="widget movable collapsable right-col-box" id="widget_' . $key . '">');
-			echo('	<div class="widget-header">' . $mod['tittel'] . '</div>');
+			echo('	<div class="widget-header">' . $mod['tittel']);
+			if ($mod['undertittel']) {
+				echo(' <span class="undertittel">' . $mod['undertittel'] . '</span>');
+			}
+			echo('</div>');
 			echo('  <div class="widget-content"><img src="images/widgets/loading.gif" alt="Henter data..." /></div>');
 			echo('</div>');
 		}				

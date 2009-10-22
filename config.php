@@ -107,12 +107,14 @@ dette med en parameter som heter 'antall'.
 
 $config['moduler']['albuminfo'] = array(
   'aktiv' => true, 
-  'tittel' => "Albuminfo"
+  'tittel' => 'Albuminfo', 
+  'undertittel' => 'Hentet fra Last.fm'
 );
 
 $config['moduler']['artist'] = array(
   'aktiv' => true, 
-  'tittel' => "Artistinfo"
+  'tittel' => "Artistinfo", 
+  'undertittel' => 'Hentet fra Last.fm'
 );
 
 $config['moduler']['dvd'] = array(

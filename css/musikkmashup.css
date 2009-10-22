@@ -94,6 +94,10 @@ img {
   font-weight: bold;
 }
 
+.undertittel {
+	font-size: x-small;	
+}
+
 .widget-content {
 	padding-left: 1em;
 	padding-right: 1em;
