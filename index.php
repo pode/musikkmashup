@@ -62,33 +62,35 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	
 	// Sortering
 	if (!empty($_GET['q'])) {
-		echo('<div id="sortering"><form>');
-		echo('Sorter på ');
-		echo('<input type="hidden" name="q" value="' . $_GET['q'] . '" />');
-		echo('<input type="hidden" name="bib" value="' . $_GET['bib'] . '" />');
-		echo('<input type="hidden" name="side" value="' . $_GET['side'] . '" />');
-		echo('<select name="sorter">');
-		$sorter = array('aar'=>'utgivelsesår', 'tittel'=>'tittel', 'artist'=>'artist');
-		foreach ($sorter as $verdi => $tekst) {
-			echo('<option value="' . $verdi . '"');
-			if (!empty($_GET['sorter']) && $_GET['sorter'] == $verdi) {
-				echo(' selected="selected"');	
+		if ($config['vis_sortering']) {
+			echo('<div id="sortering"><form>');
+			echo('Sorter på ');
+			echo('<input type="hidden" name="q" value="' . $_GET['q'] . '" />');
+			echo('<input type="hidden" name="bib" value="' . $_GET['bib'] . '" />');
+			echo('<input type="hidden" name="side" value="' . $_GET['side'] . '" />');
+			echo('<select name="sorter">');
+			$sorter = array('aar'=>'utgivelsesår', 'tittel'=>'tittel', 'artist'=>'artist');
+			foreach ($sorter as $verdi => $tekst) {
+				echo('<option value="' . $verdi . '"');
+				if (!empty($_GET['sorter']) && $_GET['sorter'] == $verdi) {
+					echo(' selected="selected"');	
+				}
+				echo('>' . $tekst . '</option>');
 			}
-			echo('>' . $tekst . '</option>');
-		}
-		echo('</select>');
-		echo('<select name="orden">');
-		$orden = array('synk'=>'synkende', 'stig'=>'stigende');
-		foreach ($orden as $verdi => $tekst) {
-			echo('<option value="' . $verdi . '"');
-			if (!empty($_GET['orden']) && $_GET['orden'] == $verdi) {
-				echo(' selected="selected"');	
+			echo('</select>');
+			echo('<select name="orden">');
+			$orden = array('synk'=>'synkende', 'stig'=>'stigende');
+			foreach ($orden as $verdi => $tekst) {
+				echo('<option value="' . $verdi . '"');
+				if (!empty($_GET['orden']) && $_GET['orden'] == $verdi) {
+					echo(' selected="selected"');	
+				}
+				echo('>' . $tekst . '</option>');
 			}
-			echo('>' . $tekst . '</option>');
+			echo('</select>');
+			echo('<input type="submit" value="Sorter" />');
+			echo("</form></div>");
 		}
-		echo('</select>');
-		echo('<input type="submit" value="Sorter" />');
-		echo("</form></div>");
 	
 		// Søk
 		if (!empty($_GET['q'])) {

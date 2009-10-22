@@ -16,6 +16,8 @@ $config['pr_side'] = 10000;
 
 // Skal det vises lenke til katalogen på postene? 
 $config['vis_kataloglenke'] = false;
+// Skal brukeren få mulighet til å velge sortering? 
+$config['vis_sortering'] = false;
 
 /*
 BIBLIOTEK
