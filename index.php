@@ -32,7 +32,7 @@ echo('
 <div class="searchform">
 <form method="get" action="">
 <p>
-<input type="text" size="50" name="q" value="' . $_GET['q'] . '" />
+Artist/album: <input type="text" size="50" name="q" value="' . $_GET['q'] . '" />
 <select name="bib">
 ');
 //skriver nedtrekksliste
