@@ -119,19 +119,22 @@ $config['moduler']['artist'] = array(
 
 $config['moduler']['dvd'] = array(
   'aktiv' => true, 
-  'tittel' => "DVDer", 
+  'tittel' => "DVDer",
+  'undertittel' => 'Hentet fra bibliotekkatalogen',  
   'antall' => 10
 );
 
 $config['moduler']['noter'] = array(
   'aktiv' => true, 
   'tittel' => "Noter", 
+  'undertittel' => 'Hentet fra bibliotekkatalogen',
   'antall' => 10
 );
 
 $config['moduler']['bok'] = array(
   'aktiv' => true, 
   'tittel' => "Bøker m.m.", 
+  'undertittel' => 'Hentet fra bibliotekkatalogen',
   'antall' => 10
 );
 
