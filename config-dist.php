@@ -114,7 +114,9 @@ $config['moduler']['albuminfo'] = array(
 $config['moduler']['artist'] = array(
   'aktiv' => true, 
   'tittel' => "Artistinfo", 
-  'undertittel' => 'Hentet fra Last.fm'
+  'undertittel' => 'Hentet fra Last.fm', 
+  // Skal artister med null treff vises i lista over "Lignende artister"? 
+  'vis_med_null_treff' => true
 );
 
 $config['moduler']['dvd'] = array(
