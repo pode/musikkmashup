@@ -58,7 +58,8 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	
 	/* TREFFLISTE */
 	
-	echo('<div id="left">');
+	echo('<div id="left" class="widget">');
+	echo('<div class="widget-header">Musikk-CD</div>');
 	
 	// Sortering
 	if (!empty($_GET['q'])) {

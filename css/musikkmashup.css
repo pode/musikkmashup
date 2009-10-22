@@ -30,7 +30,6 @@ img {
 
 #left {
 	border: 1px solid black;
-	padding: 1em;
 	float: left;
 	width: 350px;
 }
@@ -51,8 +50,15 @@ img {
 	margin-bottom: 1em;		
 }
 
+.antall-poster {
+	padding-left: 1em;
+	padding-right: 1em;
+}
+
 .basisinfo {
 	margin-bottom: 1em;	
+	padding-left: 1em;
+	padding-right: 1em;
 }
 
 .albumtittel {
@@ -89,5 +95,6 @@ img {
 }
 
 .widget-content {
-  padding:15px 25px 15px 25px;
+	padding-left: 1em;
+	padding-right: 1em;
 }

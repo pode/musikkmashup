@@ -279,7 +279,7 @@ function get_poster ($marcxml, $limit, $postvisning) {
 	// Hvis ja: plukk ut de $limit første postene
 	if ($antall_poster > $limit) {
 		$poster = array_slice($poster, 0, $limit);	
-		$out .= "<p>Viser $limit av $antall_poster treff</p>";
+		$out .= '<p class="antall-poster">' . "Viser $limit av $antall_poster treff</p>";
 	
 	// Sjekk om vi skal vise et utsnitt
 	} elseif ($antall_poster > $config['pr_side']) {
@@ -296,7 +296,7 @@ function get_poster ($marcxml, $limit, $postvisning) {
 		if ($siste > $antall_poster) {
 			$siste = $antall_poster;
 		}
-		$out .= '<p id="blaing">' . "Viser treff $forste - $siste av $antall_poster. ";
+		$out .= '<p id="blaing" class="antall-poster">' . "Viser treff $forste - $siste av $antall_poster. ";
 		$blaurl = '?q=' . $_GET['q'] . '&bib=' . $_GET['bib'] . '&sorter=' . $_GET['sorter'] . '&orden=' . $_GET['orden'] . '&side=';
 		if ($side > 1) {
 			$forrigeside = $side - 1;
@@ -315,7 +315,7 @@ function get_poster ($marcxml, $limit, $postvisning) {
 		
 	} else {
 		
-		$out .= "<p>Viser $antall_poster av $antall_poster treff</p>";
+		$out .= '<p class="antall-poster">' . "Viser $antall_poster av $antall_poster treff</p>";
 		
 	}
 
