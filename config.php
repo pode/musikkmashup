@@ -14,6 +14,9 @@ $config['maks_poster'] = 10000;
 // Hvor mange poster skal vises pr side i hovedvisningen? 
 $config['pr_side'] = 10000;
 
+// Skal det vises lenke til katalogen på postene? 
+$config['vis_kataloglenke'] = false;
+
 /*
 BIBLIOTEK
 

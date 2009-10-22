@@ -516,7 +516,9 @@ function get_basisinfo($post, $postvisning) {
     		$out .= marctrim($post->getField("260")->getSubfield("c"));
     	}
     }
-    $out .= ' <!-- [<a href="' . $itemurl . '" title="Vis i katalogen til ' . $config['libraries'][$_GET['bib']]['title'] . '">Vis i katalogen</a>] -->';
+    if ($config['vis_kataloglenke']) {
+    	$out .= ' [<a href="' . $itemurl . '" title="Vis i katalogen til ' . $config['libraries'][$_GET['bib']]['title'] . '">Vis i katalogen</a>]';
+    }
     $out .= '</div>';
     
     // HENT UT DATA FOR SORTERING
