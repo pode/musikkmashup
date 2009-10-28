@@ -43,7 +43,15 @@ if (!empty($_GET['artist'])) {
 	$methodVars = array(
 		'artist' => avinverter($_GET['artist'])
 	);
-	if ( $art = $artist->getinfo($methodVars) ) {
+	if ( $art = $artist->getinfo($methodVars) && $art['name']) {
+		
+		// Sjekk om det oppstod feil
+		if ($artist->error['code']) {
+			// Error: show which error and go no further.
+			echo '<b>Error '.$artist->error['code'].' - </b><i>'.$artist->error['desc'].'</i>';
+			exit;
+		}
+		
 		echo('<p class="overskrift">' . $art['name'] . '</p>');
 		// Bilde
 		if ($art['image']['large']) {
@@ -67,10 +75,7 @@ if (!empty($_GET['artist'])) {
 		echo("</ul>");
 		// Mer info
 		echo('<p class="les-mer"><a href="' . $art['url'] . '">Les mer hos Last.fm</a></p>');
-	} else {
-		// Error: show which error and go no further.
-		echo '<b>Error '.$artist->error['code'].' - </b><i>'.$artist->error['desc'].'</i>';
-	}
+	} 
 	
 }
 
