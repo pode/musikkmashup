@@ -173,6 +173,22 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 
 // Avslutter div content
 echo('</div>');
+
+// Sjekk om vi skal skrive ut kode for Google Analytics
+if (isset($config['google_analytics']) && $config['google_analytics'] != '') {
+	?>
+	<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	<script type="text/javascript">
+	try {
+	var pageTracker = _gat._getTracker("<?php echo($config['google_analytics']); ?>");
+	pageTracker._trackPageview();
+	} catch(err) {}</script>
+	<?php
+}
+
 echo("</body>\n</html>");
 
 ?>
