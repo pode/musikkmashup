@@ -121,6 +121,7 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	
 		// Søk
 		if (!empty($_GET['q'])) {
+			echo('<div id="treffliste-ny"></div>');
 			echo('<div id="treffliste">');
 			$q = masser_input($_GET['q']);
 			$query = '';

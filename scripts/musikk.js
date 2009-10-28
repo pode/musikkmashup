@@ -98,33 +98,28 @@ function setArtist(artist) {
 			$("#widget_albuminfo").remove();
 		}
 		
-		// Vis alle album før vi eventuelt skjuler noen
-		var totalt_antall_album = 0;
-		jQuery.each($(".basisinfo"), function() {
-			var this_album = this;
-			$(this_album).show();
-			totalt_antall_album = totalt_antall_album + 1;
-		});
-		$(".antall-poster").text("Viser " + totalt_antall_album + " av " + totalt_antall_album + " treff");
+		// Skjul den opprinnelige trefflista
+		$("#treffliste").hide();
 		
-		// Skjul irrelevante album i trefflista, hvis ikke artist = "_alle"
-		if (artist != '_alle') {
-			var antall_album = 0;
-			var antall_skjulte_album = 0;
-			jQuery.each($(".basisinfo"), function() {
-				var this_album = this;
-				var this_artist = $(this_album).find(".artist").text();
-				if (this_artist != artist) {
-					$(this_album).hide();
-					antall_skjulte_album = antall_skjulte_album + 1;
+		// Hent og vis treffliste for den valgte artisten
+		if (artist != "_alle") {
+			// Pass på at treffliste-ny er synlig
+			$("#treffliste-ny").show();
+			// Hent data
+			$.get("api/treffliste.php", { artist: artist, 
+			                         	  bib: getQueryVariable('bib')
+			                       		},
+				function(text){
+					$("#treffliste-ny").html(text);
 				}
-				antall_album = antall_album + 1;
-			});
-			var antall_viste_album = antall_album - antall_skjulte_album;
-			// Sett antallet album
-			$(".antall-poster").text("Viser " + antall_viste_album + " av " + antall_viste_album + " treff");
+			);
+		} else {
+			// Skjul trefflista vi har hentet med ajax
+			$("#treffliste-ny").hide();
+			// Vis den opprinnelige trefflista
+			$("#treffliste").show();	
 		}
-				
+		
 		// Gjør widgetene synlige, hvis ikke artist = "_alle"
 		if (artist != '_alle') {
 			$(".widget").css({'visibility' : 'visible'});
@@ -145,12 +140,14 @@ function setArtist(artist) {
 				                         q: getQueryVariable('q'),
 				                         bib: getQueryVariable('bib')
 				                       },
-				    function(data){
-				      $("#" + this_widget.id).find(".widget-content").text("");
-				      $("#" + this_widget.id).find(".widget-content").append(data);
-				    });
+					function(data){
+						$("#" + this_widget.id).find(".widget-content").text("");
+						$("#" + this_widget.id).find(".widget-content").append(data);
+					}
+				);
 			});
 		} else {
+			// Hvis artist = "_alle" skjuler vi alle widgetene og viser hovedtrefflista (id="left")
 			$(".widget").css({'visibility' : 'hidden'});
 			$("#left").css({'visibility' : 'visible'});
 		}
