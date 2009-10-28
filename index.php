@@ -121,6 +121,7 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	
 		// Søk
 		if (!empty($_GET['q'])) {
+			echo('<div id="treffliste">');
 			$q = masser_input($_GET['q']);
 			$query = '';
 			if (!empty($config['libraries'][$_GET['bib']]['sru'])) {
@@ -130,6 +131,7 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 				$query = "(fo=$q or in=$q or ti=$q) and ti=lydopptak";
 			}
 			echo(podesearch($query));
+			echo('</div>');
 		}
 	}
 
@@ -144,7 +146,9 @@ if ((!empty($_GET['q']) || !empty($_GET['id'])) && !empty($_GET['bib']) && !empt
 	
 	echo('<div id="right">');
 
-	echo('<div id="artistvelger"><form><select name="q" id="artistvalg" onChange="setArtist(this.options[this.selectedIndex].value)"><option>Velg artist...</option></select></form></div>');
+	echo('<div id="artistvelger"><form><select name="q" id="artistvalg" onChange="setArtist(this.options[this.selectedIndex].value)">');
+	echo('<option value="_alle">Velg artist...</option>');
+	echo('</select></form></div>');
 
 	foreach ($config['moduler'] as $key => $mod) {
 		if ($mod['aktiv']) {

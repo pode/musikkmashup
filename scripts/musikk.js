@@ -98,32 +98,62 @@ function setArtist(artist) {
 			$("#widget_albuminfo").remove();
 		}
 		
-		// Gjør widgetene synlige
-		$(".widget").css({'visibility' : 'visible'});
-		// Gjem artistvelgeren, hvis vi bare har en artist
-		if (antallArtister == 1) {
-			$("#artistvelger").remove();
-		}
-		// Gå igjennom alle widgetene og legg til innhold
-		jQuery.each($(".widget"), function() {
-			var this_widget = this;
-			target = this_widget.id.replace(/widget_/g, "");
-			
-			// Vi sender den samme informasjonen til modulene, uavhengig av hva de skal gjøre for noe. 
-			// På denne måten slipper vi å vite noe om hver enkelt modul før vi kaller dem opp. 
-			$.get("api/index.php", { mod: target, 
-									 artist: artist, 
-									 album: albumer[0], 
-			                         q: getQueryVariable('q'),
-			                         bib: getQueryVariable('bib')
-			                       },
-			    function(data){
-			      $("#" + this_widget.id).find(".widget-content").text("");
-			      $("#" + this_widget.id).find(".widget-content").append(data);
-			    });
-			
+		// Vis alle album før vi eventuelt skjuler noen
+		var totalt_antall_album = 0;
+		jQuery.each($(".basisinfo"), function() {
+			var this_album = this;
+			$(this_album).show();
+			totalt_antall_album = totalt_antall_album + 1;
 		});
-	
+		$(".antall-poster").text("Viser " + totalt_antall_album + " av " + totalt_antall_album + " treff");
+		
+		// Skjul irrelevante album i trefflista, hvis ikke artist = "_alle"
+		if (artist != '_alle') {
+			var antall_album = 0;
+			var antall_skjulte_album = 0;
+			jQuery.each($(".basisinfo"), function() {
+				var this_album = this;
+				var this_artist = $(this_album).find(".artist").text();
+				if (this_artist != artist) {
+					$(this_album).hide();
+					antall_skjulte_album = antall_skjulte_album + 1;
+				}
+				antall_album = antall_album + 1;
+			});
+			var antall_viste_album = antall_album - antall_skjulte_album;
+			// Sett antallet album
+			$(".antall-poster").text("Viser " + antall_viste_album + " av " + antall_viste_album + " treff");
+		}
+				
+		// Gjør widgetene synlige, hvis ikke artist = "_alle"
+		if (artist != '_alle') {
+			$(".widget").css({'visibility' : 'visible'});
+			// Gjem artistvelgeren, hvis vi bare har en artist
+			if (antallArtister == 1) {
+				$("#artistvelger").remove();
+			}
+			// Gå igjennom alle widgetene og legg til innhold
+			jQuery.each($(".widget"), function() {
+				var this_widget = this;
+				target = this_widget.id.replace(/widget_/g, "");
+				
+				// Vi sender den samme informasjonen til modulene, uavhengig av hva de skal gjøre for noe. 
+				// På denne måten slipper vi å vite noe om hver enkelt modul før vi kaller dem opp. 
+				$.get("api/index.php", { mod: target, 
+										 artist: artist, 
+										 album: albumer[0], 
+				                         q: getQueryVariable('q'),
+				                         bib: getQueryVariable('bib')
+				                       },
+				    function(data){
+				      $("#" + this_widget.id).find(".widget-content").text("");
+				      $("#" + this_widget.id).find(".widget-content").append(data);
+				    });
+			});
+		} else {
+			$(".widget").css({'visibility' : 'hidden'});
+			$("#left").css({'visibility' : 'visible'});
+		}
 }
 
 // From: http://www.webdeveloper.com/forum/showthread.php?t=166692

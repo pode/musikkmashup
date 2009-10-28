@@ -43,7 +43,7 @@ if (!empty($_GET['artist'])) {
 	$methodVars = array(
 		'artist' => avinverter($_GET['artist'])
 	);
-	if ( $art = $artist->getinfo($methodVars) && $art['name']) {
+	if ( $art = $artist->getinfo($methodVars)) {
 		
 		// Sjekk om det oppstod feil
 		if ($artist->error['code']) {
@@ -52,24 +52,28 @@ if (!empty($_GET['artist'])) {
 			exit;
 		}
 		
-		echo('<p class="overskrift">' . $art['name'] . '</p>');
-		// Bilde
-		if ($art['image']['large']) {
-			echo('<p class="artistbilde"><img src="' . $art['image']['large'] . '" alt="' . $art['name'] . '" title="' . $art['name'] . '" /></p>');
-		}
-		// Biografi
-		if ($art['bio']['summary']) {
-			echo('<p>' . lastfm_lenker($art['bio']['summary']) . '</p>');
+		if ($art['name']) {
+			echo('<p class="overskrift">' . $art['name'] . '</p>');
+			// Bilde
+			if ($art['image']['large']) {
+				echo('<p class="artistbilde"><img src="' . $art['image']['large'] . '" alt="' . $art['name'] . '" title="' . $art['name'] . '" /></p>');
+			}
+			// Biografi
+			if ($art['bio']['summary']) {
+				echo('<p>' . lastfm_lenker($art['bio']['summary']) . '</p>');
+			}
 		}
 		// Lignende artister
-		echo('<p class="lignende-artister">Lignende artister:</p><ul>');
-		foreach ($art['similar'] as $sim) {
-			$antall_treff = antall_treff($sim['name']);
-			if ($antall_treff > 0) {
-				echo('<li><a href="?q=' . urlencode($sim['name']) . '&bib=' . $_GET['bib'] . '" class="artist-navn">' . $sim['name'] . '</a>');
-				echo(' (' . $antall_treff . ')</li>');
-			} elseif ($config['moduler']['artist']['vis_med_null_treff'])  {
-				echo('<li>' . $sim['name'] . ' (' . $antall_treff . ')</li>');	
+		if ($art['similar']) {
+			echo('<p class="lignende-artister">Lignende artister:</p><ul>');
+			foreach ($art['similar'] as $sim) {
+				$antall_treff = antall_treff($sim['name']);
+				if ($antall_treff > 0) {
+					echo('<li><a href="?q=' . urlencode($sim['name']) . '&bib=' . $_GET['bib'] . '" class="artist-navn">' . $sim['name'] . '</a>');
+					echo(' (' . $antall_treff . ')</li>');
+				} elseif ($config['moduler']['artist']['vis_med_null_treff'])  {
+					echo('<li>' . $sim['name'] . ' (' . $antall_treff . ')</li>');	
+				}
 			}
 		}
 		echo("</ul>");
