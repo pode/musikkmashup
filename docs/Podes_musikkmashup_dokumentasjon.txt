@@ -1,0 +1,327 @@
+﻿Podes musikkmashup - dokumentasjon 
+1. Podes musikkmashup - dokumentasjon 
+   1. Introduksjon 
+   2. Installasjon 
+      1. Forutsetninger 
+      2. Avhengigheter 
+      3. Hent kildekoden 
+         1. Pakket fil 
+         2. Git 
+      4. config-dist.php 
+      5. Tilpasninger 
+   3. Oversikt 
+   4. Spor-informasjon i postvisning 
+   5. Protokoller 
+      1. SRU 
+      2. Z39.50 
+   6. Sortering 
+   7. Moduler 
+      1. Bibliografiske moduler 
+         1. dvd 
+         2. bok 
+      2. Last.fm 
+         1. artist 
+         2. albuminfo 
+   8. Referanseliste 
+   9. Vedlegg: Katalogstruktur og eksempelkode 
+      1. Katalogstruktur 
+      2. api/mod.x.php 
+      3. scripts/musikk.js 
+________________
+Introduksjon 
+Podes musikkmashup gir brukerne et grensesnitt der de kan søke etter artister, album- og sportitler, og få en treffliste som automatisk er avgrenset til musikk. I tillegg til denne hovedtrefflista vises en serie "bokser" som viser
+
+
+* andre relevante dokumenter fra bibliotekets samling, som DVDer og bøker om/med en valgt artist
+
+* annen relevant informasjon, hentet fra APIet til tjenesten Last.fm.
+
+Installasjon 
+Forutsetninger 
+Det skal ikke være nødvendig med programmeringskunnskaper for å installere og ta i bruk denne musikkmashupen, men det vil være en fordel at man har en viss glede av å "få ting til å virke". Man må også kunne få på plass det som finnes av avhengigheter, jfr avsnittet under, men dette bør en lokal IT-avdeling/serverleverandør kunne bistå med.
+
+Avhengigheter 
+Du trenger følgende komponenter for å kunne ta i bruk Podes reiseplanlegger:
+
+
+   * En webserver som støtter PHP. Applikasjonen er utviklet på Linux/Apache (http://httpd.apache.org/), men bør også fungere på Windows-plattformer som støtter PHP. 
+   * PHP (http://no.php.net/)
+
+   * PHP/YAZ (http://no.php.net/yaz, http://no.php.net/manual/en/yaz.installation.php) 
+   * PEAR-modulen File_MARCXML, som er en del av File_MARC http://pear.php.net/package/File_MARC/. Se PEAR Manual for informasjon om installasjon av PEAR og PEAR-moduler: http://pear.php.net/manual/en/ 
+   * Tilgang til et biblioteksystem som støtter protokollene SRU og/eller Z39.50. Ta kontakt med din systemleverandør for informasjon om adresse/URL for tilkobling. (Se http://wiki.biblab.no/index.php/Norske_Z39.50_datatilbydere og http://wiki.biblab.no/index.php/Norske_SRU_datatilbydere for oversikter over norske biblioteksystem som har disse protokollene.)
+
+Hent kildekoden 
+Kildekoden til Podes musikkmashup er tilgjengelig fra en tjeneste som heter GitHub: http://github.com/pode/musikkmashup
+
+Det er to hovedmåter å få tak i kildekoden på:
+
+Pakket fil 
+Den nyeste versjonen av kildekoden er tilgjengelig som en zip- eller tarball-fil:
+http://github.com/pode/musikkmashup/archives/master
+
+Pakk ut den nedlastede fila i mappa hvor du vil ha kildekoden. På Linux kan du gjøre dette med følgende kommandoer, avhengig av hvilken fil du lastet ned:
+
+
+unzip pode-musikkmashup-xxx.zip
+tar xvf pode-musikkmashup-xxx.tar.gz
+
+Git 
+Dersom du har installert versjonskontrollsystemet Git (http://git-scm.com/) på serveren din kan du hente kildekoden ved å lage en mappe der du vil ha den, og klone prosjektet:
+
+
+mkdir minmusikkmashup
+cd minmusikkmashup
+git clone git://github.com/pode/musikkmashup.git 
+
+
+En fordel med å gjøre det på denne måten er at du lett kan hente eventuelle nye versjoner av kildekoden med denne kommandoen:
+
+
+git pull 
+
+Dersom du har planer om å videreutvikle kildekoden og kanskje til og med dele endringene dine med prosjektet anbefales det på det sterkeste at du benytter denne metoden for å få tak i kildekoden.
+
+
+En innføring i bruken av Git er utenfor rammene av dette dokumentet, men se feks dokumentasjonssiden på Gits hjemmeside for noen tips: http://git-scm.com/documentation 
+config-dist.php
+
+Når du har pakket ut kildekoden må du flytte fila config-dist.php til config.php. På Linux kan du gjøre dette med følgende kommando:
+
+
+mv config-dist.php config.php
+
+Tilpasninger 
+Normalt skal du bare trenge å endre på innholdet i fila config.php for å ta i bruk musikkmashupen, og sette den opp for å søke mot ditt eget bibliotek. Denne fila er utstyrt med rikholdige kommentarer, så vi gjengir den her:
+
+[config.php]
+
+Oversikt 
+Når en bruker utfører et søk skjer følgende:
+
+index.php tar i mot søkebegrepet og utfører et søk mot den valgte bibliotek-katalogen. Søkebegrepet kombineres med andre avgrensninger, i det søkespråket som er aktuelt for den enkelte protokollen, for å gi treff på musikk. "$query" representerer brukerens søkebegrep:
+
+
+      * Z39.50 (CCL): (fo=$query or in=$query or ti=$query) and ti=lydopptak 
+      * SRU (CQL): (dc.author=$query or dc.title=$query) and dc.title=lydopptak 
+
+Se mer om de ulike protokollene nedenfor.
+
+Begge protokollene returnerer treff i form av MARC-poster i XML-format (MARCXML). Disse transformeres til en HTML-presentasjon ved hjelp av PHP-/PEAR-modulen File_MARCXML, og resultatet blir at det sendes en HTML-side med trefflista til brukerens nettleser.
+
+Sammen med HTML-siden sendes det en JavaScript-fil, scripts/musikk.js, som har til oppgave å lage boksene med ekstradata på høyre side av skjermen. Dette skriptet plukker ut navn på artister fra trefflista og gjør en av to ting:
+
+
+      1. Dersom trefflista bare inneholder ett unikt artistnavn vises boksene med ekstrainformasjon, slik det er beskrevet nedenfor.
+
+      2. Dersom trefflista inneholder mer enn ett unikt artistnavn bygges det opp en nedtrekksmeny med artistnavnene. Når brukeren velger et navn fra denne lista skjer det to ting:
+
+         1. Et AJAX-kall til api/treffliste.php sørger for at det blir gjort et nytt søk mot katalogen, avgrenset til lydopptak med den valgte artisten:
+Z39.50: (fo=$query or in=$query) and ti=lydopptak
+SRU: dc.author=$query and dc.title=lydopptak
+Treffliste for den valgte artisten returneres i HTML-format og erstatter den første trefflista. 
+         2. Boksene med ekstrinformasjon vises.
+
+
+Skriptet scripts/musikk.js sender navnet på valgt artist til de modulene som er aktivisert, og sørger for at disse vises på siden. Data hentes fra serveren med AJAX-teknikker, og boksene fylles med innhold mens brukeren venter. Innholdet i boksene er av to hovedtyper:
+
+
+            * Katalogposter - her gjøres det et søk i katalogen på omtrent samme måte som for hovedsøket etter lydopptak, brukerens søkebegrep kombineres med andre søkeuttrykk for å gi andre, relevante treff på DVDer og bøker.
+
+            * Informasjon om artisten, hentet fra Last.fm.
+
+
+Dersom brukeren klikker på et album i trefflista lastes siden inn på nytt, og detaljer for det valgte albumet vises i hovedvisningen på venstre side. I den grad informasjonen er lagret i posten vises her informasjon om medvirkende artister og spor på albumet. I den grad det er mulig (se avsnittet om Spor-informasjon i postvisning nedenfor) vises disse som klikkbare lenker som genererer nye søk i musikkmashupen. I boksene på høyre side vises informasjon fra Last.fm om det valgte albumet og den valgte artisten, samt bokser med treff relevant til artisten, på samme måte som ved det opprinnelige søket.
+
+Se kapittelet om moduler for flere detaljer om boksene.
+
+Skjematisk fremstilling av funksjonaliteten i musikkmashupen:
+
+
+[skjematisk fremstilling]
+
+Spor-informasjon i postvisning 
+Informasjon om sporene på et album kan være lagret som analytter i MARC-felt 740$a, med indikator 2 = 2. Det vil da være ett slikt felt pr spor, og det er uproblematisk å hente ut hvert enkelt spor og gjøre dette til en klikkbar lenke som genererer et nytt søk i musikkmashupen:
+
+
+
+Det forekommer også at informasjon om spor er lagret som en note i MARC-felt 505$a. I disse tilfellene er det ikke hensiktsmessig å forsøke å hente ut de enkelte sporene, og disse skrives derfor bare ut slik de forekommer i posten:
+
+
+Protokoller 
+Podes musikkmashup søker som standard i to kataloger:
+
+
+               * Deichmanskes Bibliofil-katalog, ved hjelp av Z39.50 
+               * En eksport av alle Deichmanskes bibliografiske poster, importert og indeksert i Koha, ved help av SRU-protokollen
+
+SRU 
+Se http://wiki.biblioteklaboratoriet.no/index.php/Koha_som_SRU-tjener for en oversikt over hvilke indekser som er tilgjengelige ved SRU-søk i en Koha-database.
+
+Z39.50 
+Z39.50 benytter i utgangspunktet den lettere kryptiske RPN-syntaksen, men ved hjalp av PHP/YAZ er det mulig å gjøre en "oversetting" (se http://no.php.net/yaz_ccl_conf), slik at man kan bruke den noe mere brukervennlig CCL-syntaksen. Følgende "mapping" er gjort mellom Bib1-attributter og CCL-kvalifikatorer:
+
+
+Forklaring
+	CCL-kvalifikator
+	Bib1-attributt
+	
+Tittel 	ti 	1=4 	
+Klassifikasjon (dewey) 	kl	1=13	
+Forfatter 	fo	1=1003	
+Korporasjon (gruppe)	in	1=2	
+År 	år	1=31 	
+Språk 	sp	1=54 	
+Emneord 	eo	1=21 	
+ISBN 	is	1=7 	
+Tittelnummer 	tnr	1=12 	
+
+Dette innebærer at når vi søker etter "fo=$query", slik det er beskrevet ovenfor, avgrenser vi egentlig med Bib1-attributtet "1=1003".
+
+Sortering 
+Standard sortering er synkende etter utgivelsesår, og som default er øvrige sorteringsvalg slått av i musikkmashupen. Det er imidlertid mulig å slå disse på i fila config.php, ved å endre
+
+    $config['vis_sortering'] = false;
+
+til 
+
+    $config['vis_sortering'] = true;
+
+Dette gir brukeren mulighet for å sortere på utgivelsesår, albumtittel og artistnavn. For alle disse valgene er det også mulig å velge stigende eller synkende sortering.
+
+Sorteringen utføres i forbindelse etter at MARCXML fra katalogen har blitt transformert til datastrukturer i PHP ved hjelp av File_MARCXML og før disse skrives ut som HTML for presentasjon til brukeren, siden sortering ikke er tilgjengelig i noen av de implementasjonene av SRU og Z39.50 vi har søkt mot.
+En del årstall er ikke angitt som rene tall, men med tilføyelser (i tråd med katalogiseringsreglene), feks "cop. 2005" eller "[2006]". Disse ekstra tegnene fjernes fra verdien i MARC-felt 260$c, før sorteringen gjennomføres.
+
+Moduler 
+Moduler - også kjent som boksene til høyre for hovedtrefflista - er implementert i filer som ligger i mappa "api", og som har navn på formen "mod.MODUL.php", der MODUL fungerer som en slags identifikator for modulen. Modulene kan slås av og på og ellers konfigureres fra fila config.php, jfr kapitlet om tilpasninger.
+
+Det er variabelen "aktiv" som bestemmer om en modul/boks vises eller ikke. Denne variabelen kan ha to verdier: "true" eller "false". Slik ser det ut når en modul er slått på:
+
+$config['moduler']['albuminfo'] = array(
+    'aktiv' =» true, 
+    'tittel' =» 'Albuminfo', 
+    'undertittel' =» 'Hentet fra Last.fm'
+);
+
+Endre "true" til "false" for å slå den av:
+
+$config['moduler']['albuminfo'] = array(
+    'aktiv' =» false, 
+    'tittel' =» 'Albuminfo', 
+    'undertittel' =» 'Hentet fra Last.fm'
+);
+
+Når brukeren søker i musikkmashupen returneres trefflista i et HTML-dokument, slik det er beskrevet over. Samtidig sjekker index.php opplysningene i config.php for å se hvilke moduler som er aktive. De aktive modulene blir skrevet ut som tomme "bokser" i HTML-dokumentet, men disse er gjort "usynlige" ved hjelp av CSS. Når det er klart hvilken artist brukeren er interessert i (enten fordi trefflista inneholder bare en artist, eller fordi en artist er valgt fra nedtrekksmenyen) fyller skriptet scripts/musikk.js boksene med innhold og gjør dem synlige.
+
+Modulene er av to hovedtyper:
+
+Bibliografiske moduler 
+Dette er moduler som søker i bibliotekkatalogen, og viser treff som er relevante for det artisten brukeren søkte etter. De fleste av disse modulene er i prinstippet like, det eneste som varierer er avgrensningene i søk. Søkebegrepene for de ulike modulene er gjengitt nedenfor. "$query" representerer brukerens søkebegrep: 
+dvd 
+                  * SRU: dc.author=$query and dc.title=dvd 
+                  * Z39.50: (fo=$query or in=$query) and ti=dvd 
+bok 
+Her var det ikke mulig å benytte seg av informasjonen i MARC-felt 245$h, i og med at "Bok" ikke oppgis her som for de andre dokumenttypene. I stedet ble det valgt en løsning der dokumenttyper som ikke er aktuelle lukes bort:
+
+
+                  * SRU: (dc.author=$query or dc.subject=$query) not (dc.title=lydopptak or dc.title=video or dc.title=musikktrykk) 
+                  * Z39.50: (fo=$query or in=$query or eo=$query) not (ti=lydopptak or ti=video or ti=musikktrykk) 
+Last.fm 
+artist 
+Henter informasjon fra API-kallet artist.getinfo hos Last.fm: http://www.last.fm/api/show/?service=267
+
+Data hentes ved hjelp av PHP Last.fm API. Navn, bilde og en kort beskrivelse hentes ut og formateres som HTML. I tillegg hentes det ut en liste med fem "lignende artister". For hver lignende artist gjøres det et søk mot katalogen for å finne antall treff på album av denne artisten. Standard fremgangsmåte er at artistnavnet skrives ut i en liste med antall treff i parenteser bak. Dersom antallet treff er større en null skrives artistnavnet ut som en lenke som genererer et søk etter den aktuelle artisten i musikkmashupen. Dersom antallet treff for en artist er 0 skrives navnet ut uten lenke. Dersom modul-variabelen vis_med_null_treff blir satt til "false" i config.php vil artister med 0 treff ikke bli skrevet ut.
+
+Den korte beskrivelsen inneholder egentlig lenker knyttet til artistnavn og feks sjangre, men disse lenkene fører kun til en "siden ikke funnet"-melding, så modulen fjerner lenkene før resultatet returneres til klienten.
+
+albuminfo 
+Henter informasjon fra API-kallet album.getinfo hos Last.fm: http://www.last.fm/api/show?service=290
+
+For å illustrere en alternativ måte å hente data på hentes data i dette tilfellet med et direkte REST-kall, og returneres i JSON-format som konverteres til en datastruktur i PHP. Tittel, omslagsbilde og kort beskrivelse hentes ut og returneres i HTML-format.
+
+Referanseliste 
+                  * Apache http://httpd.apache.org/ 
+                  * Easy Widgets http://plugins.jquery.com/project/easywidgets 
+                  * File_MARC http://pear.php.net/package/File_MARC/ 
+                  * Git http://git-scm.com/ 
+                  * Last.fm http://last.fm/ 
+                  * Last.fm API http://www.last.fm/api/ 
+                     * album.getinfo http://www.last.fm/api/show?service=290 
+                     * artist.getinfo http://www.last.fm/api/show/?service=267 
+                  *                   * Norske biblioteksystem som støtter protokollene SRU og/eller Z39.50 http://wiki.biblab.no/index.php/Norske_Z39.50_datatilbydere og http://wiki.biblab.no/index.php/Norske_SRU_datatilbydere 
+                  * PEAR http://pear.php.net/manual/en/ 
+                  * PHP http://no.php.net/ 
+                  * PHP Last.fm API http://sourceforge.net/projects/phplastfmapi/ 
+                  * PHP/YAZ http://no.php.net/yaz, http://no.php.net/manual/en/yaz.installation.php 
+                     * Konfigurasjon http://no.php.net/yaz_ccl_conf 
+________________
+Vedlegg: Mappestruktur og eksempelkode
+
+Mappestruktur 
+Øverste nivå 
+
+    .gitignore er en fil som benyttes av Git. Den er satt opp slik at Git ignorer fila config.php, noe som innebærer at endringer her ikke vil bli plukket opp av versjonskontrollsystemet.
+
+COPYING.txt inneholder GPL-lisensen i fulltekst.
+
+config-dist.php må flyttes til config.php under installasjonen, jfr avsnittet om config-dist.php.
+
+index.php er hovedfila for hele prosjektet.
+
+api/
+
+Her ligger filene som kalles opp fra JavaScriptet bokser.js, for å fylle inn innholdet i boksene på høyre side av reiseplanleggeren.
+
+index.php er et svært enkelt skript som inkluderer de underliggende modulene (mod.MODUL.php) ved behov, og returnerer data i HTML-format til bokser.js. Se avsnittet om Moduler.
+
+treffliste.php kalles opp fra scripts/musikk.js for å fylle trefflisten med treff for en artist som har blitt valgt fra nedtrekksmenyen, når den opprinnelige trefflista inneholder mer enn ett treff.
+
+
+
+
+css/
+
+jquery.easywidgets.css besørger utseende for boksene på høyre side.
+
+musikkmashup.css tar seg av formateringen ut over det jquery.easywidgets.css sørger for.
+
+docs/
+
+Her ligger dokumentasjonen til musikkmashupen i formatene PDF, ren tekst og HTML (pakket som en ZIP-fil).
+
+images/
+
+Mappa inneholder 1 underliggende mappe: widgets/, som inneholder ikoner knyttet til boksene
+
+include/
+
+Fila functions.php inneholder mye av den sentrale funksjonaliteten i reiseplanleggeren, og inkluderes av både index.php og de ulike modulene under api/.
+
+lastfmapi/
+
+Her ligger koden til PHP Last.fm API, hentet fra http://sourceforge.net/projects/phplastfmapi/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+scripts/ 
+
+Her ligger filer med JavaScript-funksjonalitet.
+
+jquery.easywidgets.min.js inneholder funksjonalitet knyttet til boksene på høyre siden av reiseplanleggeren, og er hentet fra http://plugins.jquery.com/project/easywidgets
+
+api/mod.x.php 
+[alle modulene]
+
+scripts/musikk.js 
+[fila]
