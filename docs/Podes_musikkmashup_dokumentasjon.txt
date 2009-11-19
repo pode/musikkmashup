@@ -94,7 +94,185 @@ mv config-dist.php config.php
 Tilpasninger 
 Normalt skal du bare trenge å endre på innholdet i fila config.php for å ta i bruk musikkmashupen, og sette den opp for å søke mot ditt eget bibliotek. Denne fila er utstyrt med rikholdige kommentarer, så vi gjengir den her:
 
-[config.php]
+«?php 
+
+/*
+
+Copyright 2009 ABM-utvikling
+
+This file is part of "Podes musikkmashup".
+
+"Podes musikkmashup" is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+"Podes musikkmashup" is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with "Podes musikkmashup".  If not, see «http://www.gnu.org/licenses/».
+
+Source code available from: 
+http://github.com/pode/musikkmashup/
+
+*/
+
+/* Konfigurasjonsfil for Podes musikkmashup */
+
+// Navnet som vises i title-taggen og øverst på alle sider
+$config['navn'] = 'Podes musikkmashup';
+
+// Ledetekst for søkeboksen
+$config['ledetekst'] = 'Artist/album: ';
+
+// Skal vi skrive ut litt ekstra debug-info? 
+// Verdier: true eller false
+$config['debug'] = true;
+
+// Hvor mange poster skal maksimalt hentes? 
+$config['maks_poster'] = 10000;
+// Hvor mange poster skal vises pr side i hovedvisningen? 
+$config['pr_side'] = 10000;
+
+// Skal det vises lenke til katalogen på postene? 
+$config['vis_kataloglenke'] = false;
+// Skal brukeren få mulighet til å velge sortering? 
+$config['vis_sortering'] = false;
+
+/*
+GOOGLE ANALYTICS
+
+Du kan bruke Google analytics for å se statistikk for bruken av denne applikasjonen. 
+Du trenger en kode for å aktivisere denne tjenesten, dette jkan du få her: 
+https://www.google.com/analytics/
+Eksempel: $config['google_analytics'] = "UA-12345678-1";
+Dersom du ikke oppgir noen kode nedenfor vil Google Analytics ikke bli aktivert. 
+*/
+
+$config['google_analytics'] = "";
+
+/*
+BIBLIOTEK
+
+Her konfigureres de bibliotekene det skal være mulig å søke i, og 
+de opplysningene som trengs for å utføre søket. Rekkefølgen her
+bestemmer rekkefølgen når bibliotekene skal velges ved søk. 
+
+Opplysninger som trengs: 
+title: navn på biblioteket 
+z3950 ELLER sru og item_url
+z3950: tilkoblings-streng for Z39.50
+sru: tilkoblingsstreng for SRU
+item_url: grunn-URL for postvisning i katalogen
+*/
+
+$config['libraries']['pode'] = array(
+    'title'    =» 'Pode', 
+    'sru'      =» 'http://torfeus.deich.folkebibl.no:9999/biblios', 
+    'item_url' =» 'http://dev.bibpode.no/cgi-bin/koha/opac-detail.pl?biblionumber='
+);
+$config['libraries']['deich'] = array(
+    'title' =» 'Deichmanske', 
+    'z3950' =» 'z3950.deich.folkebibl.no:210/data'
+);
+
+/*
+
+Flere bibliotek, for eventuell testing
+
+$config['libraries']['bibsys'] = array(
+    'title' =» 'BIBSYS', 
+    'z3950' =» 'z3950.bibsys.no:2100/BIBSYS', 
+);
+$config['libraries']['trondheim'] = array(
+    'title' =» 'Trondheim folkebibliotek', 
+    'z3950' =» 'z3950.trondheim.folkebibl.no:210/data', 
+);
+$config['libraries']['bergen'] = array(
+    'title' =» 'Bergen offentlige', 
+    'z3950' =» 'z3950.bergen.folkebibl.no:210/data', 
+);
+
+*/
+
+/* 
+LAST.FM 
+
+Informasjon om APIet: 
+http://www.last.fm/api
+
+For testing kan du bruke API-nøkkelen vår som er oppgitt nedenfor, skal du 
+ta denne applikasjonen i bruk må du skaffe deg din egen, og bytte den ut med 
+vår nedenfor. Se her for mer info: 
+http://www.last.fm/api/account
+
+*/
+
+$config['lastfm'] = array(
+    'api_key' =» 'Lim inn din API-nøkkel her', 
+    'api_root' =» 'http://ws.audioscrobbler.com/2.0/'
+);
+
+/*
+MODULER
+
+Moduler konfigureres med et array på formen
+$config['moduler']['MODUL'] = array();
+der MODUL tilsvarer den midterste delen av filnavnet modulen 
+er implementert i: mod.MODUL.php. 
+
+Rekkefølgen på modulene nedenfor bestemmer rekkfølgen modulene
+vises i på siden. (Men dette kan overstyres av brukerne, som selv kan
+flytte rundt på modulene.)
+
+Alle moduler har minst to parametere: 
+'aktiv': true eller false, dvs om modulen er slått av eller på. 
+'tittel': tittelen som vises i modul/widget-boksen
+
+Dersom modulen inneholder en liste med elementer hvor antallet 
+elementer skal kunne begrenses ved hjelp av en parameter gjøres 
+dette med en parameter som heter 'antall'.
+*/
+
+$config['moduler']['albuminfo'] = array(
+  'aktiv' =» true, 
+  'tittel' =» 'Albuminfo', 
+  'undertittel' =» 'Hentet fra Last.fm'
+);
+
+$config['moduler']['artist'] = array(
+  'aktiv' =» true, 
+  'tittel' =» "Artistinfo", 
+  'undertittel' =» 'Hentet fra Last.fm', 
+  // Skal artister med null treff vises i lista over "Lignende artister"? 
+  'vis_med_null_treff' =» true
+);
+
+$config['moduler']['dvd'] = array(
+  'aktiv' =» true, 
+  'tittel' =» "DVDer",
+  'undertittel' =» 'Hentet fra bibliotekkatalogen',  
+  'antall' =» 10
+);
+
+$config['moduler']['noter'] = array(
+  'aktiv' =» true, 
+  'tittel' =» "Noter", 
+  'undertittel' =» 'Hentet fra bibliotekkatalogen',
+  'antall' =» 10
+);
+
+$config['moduler']['bok'] = array(
+  'aktiv' =» true, 
+  'tittel' =» "Bøker m.m.", 
+  'undertittel' =» 'Hentet fra bibliotekkatalogen',
+  'antall' =» 10
+);
+
+?»
 
 Oversikt 
 Når en bruker utfører et søk skjer følgende:
@@ -137,8 +315,6 @@ Se kapittelet om moduler for flere detaljer om boksene.
 
 Skjematisk fremstilling av funksjonaliteten i musikkmashupen:
 
-
-[skjematisk fremstilling]
 
 Spor-informasjon i postvisning 
 Informasjon om sporene på et album kan være lagret som analytter i MARC-felt 740$a, med indikator 2 = 2. Det vil da være ett slikt felt pr spor, og det er uproblematisk å hente ut hvert enkelt spor og gjøre dette til en klikkbar lenke som genererer et nytt søk i musikkmashupen:
@@ -190,6 +366,7 @@ til
 Dette gir brukeren mulighet for å sortere på utgivelsesår, albumtittel og artistnavn. For alle disse valgene er det også mulig å velge stigende eller synkende sortering.
 
 Sorteringen utføres i forbindelse etter at MARCXML fra katalogen har blitt transformert til datastrukturer i PHP ved hjelp av File_MARCXML og før disse skrives ut som HTML for presentasjon til brukeren, siden sortering ikke er tilgjengelig i noen av de implementasjonene av SRU og Z39.50 vi har søkt mot.
+
 En del årstall er ikke angitt som rene tall, men med tilføyelser (i tråd med katalogiseringsreglene), feks "cop. 2005" eller "[2006]". Disse ekstra tegnene fjernes fra verdien i MARC-felt 260$c, før sorteringen gjennomføres.
 
 Moduler 
@@ -248,7 +425,8 @@ Referanseliste
                   * Last.fm API http://www.last.fm/api/ 
                      * album.getinfo http://www.last.fm/api/show?service=290 
                      * artist.getinfo http://www.last.fm/api/show/?service=267 
-                  *                   * Norske biblioteksystem som støtter protokollene SRU og/eller Z39.50 http://wiki.biblab.no/index.php/Norske_Z39.50_datatilbydere og http://wiki.biblab.no/index.php/Norske_SRU_datatilbydere 
+                  * 
+                  * Norske biblioteksystem som støtter protokollene SRU og/eller Z39.50 http://wiki.biblab.no/index.php/Norske_Z39.50_datatilbydere og http://wiki.biblab.no/index.php/Norske_SRU_datatilbydere 
                   * PEAR http://pear.php.net/manual/en/ 
                   * PHP http://no.php.net/ 
                   * PHP Last.fm API http://sourceforge.net/projects/phplastfmapi/ 
@@ -267,6 +445,17 @@ COPYING.txt inneholder GPL-lisensen i fulltekst.
 config-dist.php må flyttes til config.php under installasjonen, jfr avsnittet om config-dist.php.
 
 index.php er hovedfila for hele prosjektet.
+
+
+
+
+
+
+
+
+
+
+
 
 api/
 
@@ -289,9 +478,11 @@ docs/
 
 Her ligger dokumentasjonen til musikkmashupen i formatene PDF, ren tekst og HTML (pakket som en ZIP-fil).
 
+
+
 images/
 
-Mappa inneholder 1 underliggende mappe: widgets/, som inneholder ikoner knyttet til boksene
+Mappa inneholder 1 underliggende mappe: widgets/, som inneholder ikoner knyttet til boksene.
 
 include/
 
@@ -320,8 +511,544 @@ Her ligger filer med JavaScript-funksjonalitet.
 
 jquery.easywidgets.min.js inneholder funksjonalitet knyttet til boksene på høyre siden av reiseplanleggeren, og er hentet fra http://plugins.jquery.com/project/easywidgets
 
-api/mod.x.php 
-[alle modulene]
+api/mod.albuminfo.php 
+«?php
+
+/*
+
+Copyright 2009 ABM-utvikling
+
+This file is part of "Podes musikkmashup".
+
+"Podes musikkmashup" is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+"Podes musikkmashup" is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with "Podes musikkmashup".  If not, see «http://www.gnu.org/licenses/».
+
+Source code available from:
+http://github.com/pode/musikkmashup/
+
+*/
+
+include_once('../config.php');
+
+if (!$config['moduler']['albuminfo']['aktiv']) {
+  exit;
+}
+
+include_once('../include/functions.php');
+
+if (!empty($_GET['album']) && !empty($_GET['artist'])) {
+    
+    $url = $config['lastfm']['api_root'];
+    $url .= "?method=album.getinfo";
+    $url .= "&api_key=" . $config['lastfm']['api_key'];
+    $url .= "&artist=" . urlencode(avinverter($_GET['artist']));
+    $url .= "&album=" . urlencode($_GET['album']);
+    $url .= "&format=json";
+    
+    if ($album = json_decode(file_get_contents($url), true)) {
+        // Sjekk om det er noe feil
+        if ($album['error']) {
+            echo("«p»Beklager, det oppstod en feil!«br /»({$album['message']})«/p»");
+            exit;
+        }
+        // Tittel
+        echo('«p class="overskrift"»' . $album['album']['name'] . '«/p»');
+        // Bilde
+        if ($album['album']['image'][2]['#text']) {
+            echo('«p class="albumbilde"»«img src="' . $album['album']['image'][2]['#text'] . '" alt="' . $album['album']['name'] . '" title="' . $album['album']['name'] . '" /»«/p»');
+        }
+        // Beskrivelse
+        if ($album['album']['wiki']['summary']) {
+            echo('«p»' . lastfm_lenker($album['album']['wiki']['summary'])  . '«/p»');
+        }
+        // Mer info
+        echo('«p class="les-mer"»«a href="' . $album['album']['url'] . '"»Les mer hos Last.fm«/a»«/p»');
+    }
+    
+}
+
+?»
+
+api/mod.artist.php 
+«?php
+
+/*
+
+Copyright 2009 ABM-utvikling
+
+This file is part of "Podes musikkmashup".
+
+"Podes musikkmashup" is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+"Podes musikkmashup" is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with "Podes musikkmashup".  If not, see «http://www.gnu.org/licenses/».
+
+Source code available from:
+http://github.com/pode/musikkmashup/
+
+*/
+
+include_once('../config.php');
+
+if (!$config['moduler']['artist']['aktiv']) {
+  exit;
+}
+
+include_once('../include/functions.php');
+include_once('../lastfmapi/lastfmapi.php');
+
+if (!empty($_GET['artist'])) {
+    
+    $authVars['apiKey'] = $config['lastfm']['api_key'];
+    $auth = new lastfmApiAuth('setsession', $authVars);
+    $apiClass = new lastfmApi();
+    $artist = $apiClass-»getPackage($auth, 'artist');
+    
+    $methodVars = array(
+        'artist' =» avinverter($_GET['artist'])
+    );
+    if ( $art = $artist-»getinfo($methodVars)) {
+        
+        // Sjekk om det oppstod feil
+        if ($artist-»error['code']) {
+            // Error: show which error and go no further.
+            echo '«b»Error '.$artist-»error['code'].' - «/b»«i»'.$artist-»error['desc'].'«/i»';
+            exit;
+        }
+        
+        if ($art['name']) {
+            echo('«p class="overskrift"»' . $art['name'] . '«/p»');
+            // Bilde
+            if ($art['image']['large']) {
+                echo('«p class="artistbilde"»«img src="' . $art['image']['large'] . '" alt="' . $art['name'] . '" title="' . $art['name'] . '" /»«/p»');
+            }
+            // Biografi
+            if ($art['bio']['summary']) {
+                echo('«p»' . lastfm_lenker($art['bio']['summary']) . '«/p»');
+            }
+        }
+        // Lignende artister
+        if ($art['similar']) {
+            echo('«p class="lignende-artister"»Lignende artister:«/p»«ul»');
+            foreach ($art['similar'] as $sim) {
+                $antall_treff = antall_treff($sim['name']);
+                if ($antall_treff » 0) {
+                    echo('«li»«a href="?q=' . urlencode($sim['name']) . '&bib=' . $_GET['bib'] . '" class="artist-navn"»' . $sim['name'] . '«/a»');
+                    echo(' (' . $antall_treff . ')«/li»');
+                } elseif ($config['moduler']['artist']['vis_med_null_treff'])  {
+                    echo('«li»' . $sim['name'] . ' (' . $antall_treff . ')«/li»');    
+                }
+            }
+        }
+        echo("«/ul»");
+        // Mer info
+        echo('«p class="les-mer"»«a href="' . $art['url'] . '"»Les mer hos Last.fm«/a»«/p»');
+    }
+    
+}
+
+function antall_treff($q) {
+
+    global $config;
+    $bib = $_GET['bib'];
+    $debug = 0;
+    
+    if ($config['libraries'][$bib]['sru']) {
+
+        // SRU
+        
+        $qu = urlencode($q);
+        $query = '(dc.author=' . $qu . '+or+dc.title=' . $qu . ')+and+dc.title=lydopptak';
+        $sruurl = $config['libraries'][$bib]['sru'] . '?version=1.1&operation=searchRetrieve&query=' . $query;
+        if ($xml = file_get_contents($sruurl)) {
+            preg_match("/numberOfRecords»(.*?)«/", $xml, $matches);
+            return($matches[1]);
+        } else {
+            echo('error');    
+        }
+
+    } else {
+
+        //Z39.50
+
+        $ccl = "(fo=$q or in=$q or ti=$q) and ti=lydopptak";
+
+        $host = $config['libraries'][$bib]['z3950'];
+        $zconfig = get_zconfig();
+        $type = 'xml';
+        $syntax = 'NORMARC';
+            
+        $id = yaz_connect($host);
+        yaz_element($id, "F");
+        yaz_syntax($id, $syntax);
+        yaz_range($id, 1, 1);
+        
+        yaz_ccl_conf($id, $zconfig);
+        $cclresult = array();
+        if (!yaz_ccl_parse($id, $ccl, $cclresult)) {
+            echo($debug ? 'Error: '.$cclresult["errorstring"] : 'error');
+        } else {
+            $rpn = $cclresult["rpn"];
+            yaz_search($id, "rpn", utf8_decode($rpn));
+        }
+        
+        yaz_wait();
+    
+        $error = yaz_error($id);
+        if (!empty($error))    {
+            echo($debug ? "Error yazCclArray: $error" : 'error');
+        } else {
+            return(yaz_hits($id));
+        }
+    }
+    
+}
+
+?»
+
+api/mod.bok.php 
+«?php
+
+/*
+
+Copyright 2009 ABM-utvikling
+
+This file is part of "Podes musikkmashup".
+
+"Podes musikkmashup" is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+"Podes musikkmashup" is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with "Podes musikkmashup".  If not, see «http://www.gnu.org/licenses/».
+
+Source code available from:
+http://github.com/pode/musikkmashup/
+
+*/
+
+include_once('../config.php');
+
+if (!$config['moduler']['dvd']['aktiv']) {
+  exit;
+}
+
+include_once('../include/functions.php');
+
+if (!empty($_GET['artist'])) {
+    
+    $q = masser_input($_GET['artist']);
+    $query = '';
+    if ($config['libraries'][$_GET['bib']]['sru']) {
+        $qu = urlencode($q);
+        $query = "(dc.author=$qu+or+dc.subject=$qu)+not+(dc.title=lydopptak+or+dc.title=video+or+dc.title=musikktrykk)";
+    } else {
+        $query = "(fo=$q or in=$q or eo=$q) not (ti=lydopptak or ti=video or ti=musikktrykk)";
+    }
+
+    echo(modulsearch($query, 'dvd'));
+    
+}
+
+?» 
+api/mod.dvd.php 
+«?php
+
+/*
+
+Copyright 2009 ABM-utvikling
+
+This file is part of "Podes musikkmashup".
+
+"Podes musikkmashup" is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+"Podes musikkmashup" is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with "Podes musikkmashup".  If not, see «http://www.gnu.org/licenses/».
+
+Source code available from:
+http://github.com/pode/musikkmashup/
+
+*/
+
+include_once('../config.php');
+
+if (!$config['moduler']['dvd']['aktiv']) {
+  exit;
+}
+
+include_once('../include/functions.php');
+
+if (!empty($_GET['artist'])) {
+    
+    $q = masser_input($_GET['artist']);
+    $query = '';
+    if ($config['libraries'][$_GET['bib']]['sru']) {
+        $qu = urlencode($q);
+        $query = "dc.author=$qu+and+dc.title=dvd";
+    } else {
+        $query = "(fo=$q or in=$q) and ti=dvd";
+    }
+
+    echo(modulsearch($query, 'dvd'));
+    
+}
+
+?»
+
+
+api/mod.noter.php 
+«?php
+
+/*
+
+Copyright 2009 ABM-utvikling
+
+This file is part of "Podes musikkmashup".
+
+"Podes musikkmashup" is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+"Podes musikkmashup" is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with "Podes musikkmashup".  If not, see «http://www.gnu.org/licenses/».
+
+Source code available from:
+http://github.com/pode/musikkmashup/
+
+*/
+
+include_once('../config.php');
+
+if (!$config['moduler']['noter']['aktiv']) {
+  exit;
+}
+
+include_once('../include/functions.php');
+
+if (!empty($_GET['artist'])) {
+    
+    $q = masser_input($_GET['artist']);
+    $query = '';
+    if ($config['libraries'][$_GET['bib']]['sru']) {
+        $qu = urlencode($q);
+        $query = "dc.author=$qu+and+dc.title=musikktrykk";
+    } else {
+        $query = "(fo=$q or in=$q or eo=$q) and ti=musikktrykk";
+    }
+
+    echo(modulsearch($query, 'noter'));
+    
+}
+
+?»
 
 scripts/musikk.js 
-[fila]
+/*
+
+Copyright 2009 ABM-utvikling
+
+This file is part of "Podes musikkmashup".
+
+"Podes musikkmashup" is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+"Podes musikkmashup" is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with "Podes musikkmashup".  If not, see «http://www.gnu.org/licenses/».
+
+Source code available from: 
+http://github.com/pode/musikkmashup/
+
+*/
+
+// Globale variabler
+var antallArtister = 0;
+
+// Dette er en jQuery funksjon som automatisk kjøres når hele siden er lastet inn 
+// (dvs, egentlig når DOMen er klar)
+$(function(){
+
+    // Gjør boksene til "widgets"
+    // useCookies : true gjør at det brukes cookies for å huske tilstanden til boksene 
+    // mellom sesjoner
+    $.fn.EasyWidgets({
+    
+        behaviour : {
+            useCookies : true
+        },
+        
+        i18n : {
+            editText       : ' «img src="images/widgets/edit.png"     alt="Rediger" width="16" height="16" /»',
+            closeText      : ' «img src="images/widgets/close.png"    alt="Close"   width="16" height="16" /»',
+            collapseText   : ' «img src="images/widgets/collapse.png" alt="Lukk"    width="16" height="16" /»',
+            cancelEditText : ' «img src="images/widgets/edit.png"     alt="Avbryt"  width="16" height="16" /»',
+            extendText     : ' «img src="images/widgets/extend.png"   alt="Close"   width="16" height="16" /»'
+        }
+    });
+
+    // Bygger opp et array med navn på artistene som forekommer i lista
+    var artister = new Array();
+    jQuery.each($(".artist"), function() {
+        var artist = $(this).text();
+        if (jQuery.inArray(artist, artister) == -1) {
+            artister.push(artist);
+            // $("#right").append("«p»" + artist + "«/p»");
+        }
+    });
+    
+    // debug 
+    // alert(artister);
+    
+    //Sjekker hvor mange artister vi har funnet
+    antallArtister = artister.length;
+    if (antallArtister == 0) {
+    
+        // 0 artister
+        $("#right").append("«p»Beklager, fant ingen artister...«/p»");
+    
+    } else if (antallArtister == 1) {
+    
+        setArtist(artister[0]);
+    
+    } else {
+    
+        // Flere artister
+        $("#artistvelger").css({'visibility' : 'visible'});
+        jQuery.each(artister, function(i, n) {
+            $("#artistvalg").append("«option»" + n + "«/option»");
+        });
+    
+    }
+    
+});
+
+function setArtist(artist) {
+
+        // Lag et array med albumtitler
+        var albumer = new Array();
+        jQuery.each($(".albumtittel"), function() {
+            var album = $(this).text();
+            if (jQuery.inArray(album, albumer) == -1) {
+                albumer.push(album);
+            }
+        });
+        // Fjern boksen for album-info?
+        if (albumer.length » 1) {
+            $("#widget_albuminfo").remove();
+        }
+        
+        // Skjul den opprinnelige trefflista
+        $("#treffliste").hide();
+        
+        // Hent og vis treffliste for den valgte artisten
+        if (artist != "_alle") {
+            // Pass på at treffliste-ny er synlig
+            $("#treffliste-ny").show();
+            // Hent data
+            $.get("api/treffliste.php", { artist: artist, 
+                                           bib: getQueryVariable('bib')
+                                           },
+                function(text){
+                    $("#treffliste-ny").html(text);
+                }
+            );
+        } else {
+            // Skjul trefflista vi har hentet med ajax
+            $("#treffliste-ny").hide();
+            // Vis den opprinnelige trefflista
+            $("#treffliste").show();    
+        }
+        
+        // Gjør widgetene synlige, hvis ikke artist = "_alle"
+        if (artist != '_alle') {
+            $(".widget").css({'visibility' : 'visible'});
+            // Gjem artistvelgeren, hvis vi bare har en artist
+            if (antallArtister == 1) {
+                $("#artistvelger").remove();
+            }
+            // Gå igjennom alle widgetene og legg til innhold
+            jQuery.each($(".widget"), function() {
+                var this_widget = this;
+                target = this_widget.id.replace(/widget_/g, "");
+                
+                // Vi sender den samme informasjonen til modulene, uavhengig av hva de skal gjøre for noe. 
+                // På denne måten slipper vi å vite noe om hver enkelt modul før vi kaller dem opp. 
+                $.get("api/index.php", { mod: target, 
+                                         artist: artist, 
+                                         album: albumer[0], 
+                                         q: getQueryVariable('q'),
+                                         bib: getQueryVariable('bib')
+                                       },
+                    function(data){
+                        $("#" + this_widget.id).find(".widget-content").text("");
+                        $("#" + this_widget.id).find(".widget-content").append(data);
+                    }
+                );
+            });
+        } else {
+            // Hvis artist = "_alle" skjuler vi alle widgetene og viser hovedtrefflista (id="left")
+            $(".widget").css({'visibility' : 'hidden'});
+            $("#left").css({'visibility' : 'visible'});
+        }
+}
+
+// From: http://www.webdeveloper.com/forum/showthread.php?t=166692
+function getQueryVariable(variable)
+{
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0; i«vars.length; i++)
+    {
+        pair = vars[i].split("=");
+        if (pair[0] == variable)
+        {
+            str_arr = pair[1].split("+");
+            return str_arr.join(" ");
+        }
+    }
+    return "";
+}
